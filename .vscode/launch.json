@@ -8,6 +8,13 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": false
+        },
+        {
+            "name": "VideoMakerFromImage Package",
+            "type": "python",
+            "request": "launch",
+            "module": "VideoMakerFromImage",
+            "justMyCode": false
         }
     ]
 }
