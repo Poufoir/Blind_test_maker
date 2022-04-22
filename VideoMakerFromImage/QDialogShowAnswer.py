@@ -44,10 +44,12 @@ class QDialogShowAnswer(QDialog):
             question = self._model.item(row, 1).text()
             self._model.removeRow(row)
             return self._answer.pop(question)
-        elif isinstance(question_or_row, str) and question_or_row in self._answer:
-            row = self._model.findItems(question_or_row)[0].row()
+        elif isinstance(question_or_row, str) and self._model.findItems(question_or_row, column=1)!=[]:
+            item = self._model.findItems(question_or_row, column=1)[0]
+            row = item.row()
+            question = self._model.item(row,0).text()
             self._model.removeRow(row)
-            return self._answer.pop(question_or_row)
+            return self._answer.pop(question)
         return None
     
     def closeEvent(self, arg__1: QCloseEvent) -> None:
@@ -58,7 +60,7 @@ class QDialogShowAnswer(QDialog):
     def __len__(self) -> int:
         return self._model.rowCount()
     
-    def get_row(self, row:int) -> Optional[Tuple[str, str, str]]:
+    def get_row(self, row:int) -> Optional[Tuple[str, str, float]]:
         if row<len(self):
-            return (self._model.item(row,0).text(), self._model.item(row,1).text(), 0)
+            return (self._model.item(row,0).text(), self._model.item(row,1).text(), float(self._model.item(row,2).text()))
         return None

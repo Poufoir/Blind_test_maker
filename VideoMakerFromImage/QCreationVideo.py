@@ -154,15 +154,11 @@ class QMainUiWindow(QMainWindow):
         if n==0:
             return
         try:
-            file_to_write = self._path_output.text()
-            if os.path.exists(os.path.dirname(file_to_write)):
-                myBat = open(file_to_write)
-            else:
-                myBat = open('./cmd_file.bat','w')
+            myBat = open('./cmd_file.bat','w')
             timer = (self._timer_from.value(), self._timer_to.value())
             size = self._size_setting.value()
             fontcolor = self._color_setting.text()
-            path_video_output = "C:/Users/clemeunier/Downloads/Video_test/CountDown_answer.mp4"
+            path_video_output = self._path_output.text()
             myBat.write(self._path_ffmpeg_bin.text() + "/ffmpeg ")
             music_file =''
             music_separation_seconds = ''
