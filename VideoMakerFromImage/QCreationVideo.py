@@ -157,6 +157,7 @@ class QMainUiWindow(QMainWindow):
             myBat = open('./cmd_file.bat','w')
             timer = (self._timer_from.value(), self._timer_to.value())
             size = self._size_setting.value()
+            duration = 10
             fontcolor = self._color_setting.text()
             path_video_output = self._path_output.text()
             myBat.write(self._path_ffmpeg_bin.text() + "/ffmpeg ")
@@ -175,7 +176,7 @@ class QMainUiWindow(QMainWindow):
                 if os.path.exists(music):
                     music = music.replace("\\", "/")
                     music_file += f"""-i "{music}" """
-                    music_separation_seconds += f"""[{row+n}:a] atrim=start={start}:duration=10,asetpts=PTS-STARTPTS[music_row{row}];"""
+                    music_separation_seconds += f"""[{row+n}:a] atrim=start={start}:duration={duration},asetpts=PTS-STARTPTS[music_row{row}];"""
                     row_text_cmd += f"[music_row{row}] "
 
             if music_file != '':
