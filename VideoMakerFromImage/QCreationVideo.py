@@ -1,108 +1,11 @@
 
-from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QDialog, QTableView, QHeaderView, QFileDialog, QMessageBox, QDoubleSpinBox
-from PySide6.QtGui import QCloseEvent, QStandardItemModel, QStandardItem
+from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QDoubleSpinBox, QSpinBox
 from PySide6.QtCore import Qt
 from typing import Optional, Dict, Tuple, List, Callable
 import os
 import subprocess
-
-class QDialogAnswer(QDialog):
-
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
-        super().__init__(parent)
-
-        self.setWindowTitle("Answer")
-
-        self._layout = QGridLayout(self)
-
-        self._label_link = QLabel(self, text="Link or Path :")
-        self._link_path = QLineEdit(self)
-        self._link_path.setPlaceholderText("Link or Path")
-        self._layout.addWidget(self._label_link, 0, 0)
-        self._layout.addWidget(self._link_path, 0, 1)
-
-        self._label_answer = QLabel(self, text="Answer :")
-        self._answer = QLineEdit(self)
-        self._answer.setPlaceholderText("Answer")
-        self._layout.addWidget(self._label_answer, 1, 0)
-        self._layout.addWidget(self._answer, 1, 1)
-
-        self._label_start = QLabel(self, text="Start of music :")
-        self._start = QDoubleSpinBox(self, value=0)
-        self._layout.addWidget(self._label_start, 2, 0)
-        self._layout.addWidget(self._start, 2, 1)
-
-        self._valid = QPushButton(self, text= "Valid Answer")
-        self._valid.clicked.connect(self.valid_answer)
-        self._layout.addWidget(self._valid, 3, 0, 1, 2)
-    
-    def valid_answer(self) -> None:
-        if os.path.exists(self._link_path.text()):
-            self.accept()
-        else:
-            msgbox = QMessageBox(text="File not found on local, are you sure you wish to add?")
-            msgbox.setStandardButtons(QMessageBox.Yes)
-            msgbox.addButton(QMessageBox.No)
-            if (msgbox.exec() == QMessageBox.Yes):
-                self.accept()
-            else:
-                self.close()
-    
-    def getAnswer(self) -> Tuple[str, str, float]:
-        return self._link_path.text(), self._answer.text(), self._start.value()
-    
-class QDialogShowAnswer(QDialog):
-
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
-        super().__init__(parent)
-
-        self.setWindowTitle("Show Answer")
-        self.setMinimumSize(700,500)
-        self.move(0,0)
-        self._layout = QVBoxLayout(self)
-        self._block = True
-
-        self._model = QStandardItemModel(self)
-        self._model.setColumnCount(2)
-        self._tab_view = QTableView(self)
-        self._tab_view.setEditTriggers(QTableView.NoEditTriggers)
-        self._model.setHorizontalHeaderLabels(["Music link", "Answer"])
-        self._tab_view.setModel(self._model)
-        self._tab_view.horizontalHeader().setStretchLastSection(True)
-        self._tab_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-
-        self._layout.addWidget(self._tab_view)
-
-        self._answer:Dict[str,str] = {}
-
-    def addAnswer(self, question:str, answer:str) -> None:
-        if question not in self._answer:
-            items = [QStandardItem(question), QStandardItem(answer)]
-            self._model.appendRow(items)
-        else:
-            row = self._model.findItems(question)[0].row()
-            self._model.setItem(row, 1, QStandardItem(answer))
-        self._answer[question] = answer
-    
-    def deleteAnswer(self, question:str) -> Optional[str]:
-        if question in self._answer:
-            row = self._model.findItems(question)[0].row()
-            self._model.removeRow(row)
-            return self._answer.pop(question)
-        return None
-    
-    def closeEvent(self, arg__1: QCloseEvent) -> None:
-        if self._block:
-            return self.hide()
-        return super().closeEvent(arg__1)
-    
-    def __len__(self) -> int:
-        return self._model.rowCount()
-    
-    def get_row(self, row:int) -> Optional[Tuple[str, str, str]]:
-        if row<len(self):
-            return (self._model.item(row,0).text(), self._model.item(row,1).text(), 0)
-        return None
+from VideoMakerFromImage.QDialogTemp import QDialogAnswer, QDialogRemovePath
+from VideoMakerFromImage.QDialogShowAnswer import QDialogShowAnswer
 
 class QMainUiWindow(QMainWindow):
 
@@ -154,6 +57,8 @@ class QMainUiWindow(QMainWindow):
         self._layout_path.addWidget(self._path_output, 2, 1)
         self._layout_path.addWidget(self._browse_path_output, 2, 2)
 
+
+
         self._answer_group = QGroupBox("Music", self._central_widget)
         self._layout.addWidget(self._answer_group)
 
@@ -181,7 +86,25 @@ class QMainUiWindow(QMainWindow):
         self._show_answer = QPushButton(self._answer_group, text="Show Music and Answer")
         self._show_answer.clicked.connect(self.showPath)
         self._layout_answer.addWidget(self._show_answer, 3, 0, 1, 4)
+
+
+
+        self._video_group = QGroupBox("Video", self._central_widget)
+        self._layout.addWidget(self._video_group)
+        self._layout_video = QGridLayout(self._video_group)
+
+        self._label_color_setting = QLabel(self._video_group, text="Color of Answer :")
+        self._color_setting = QLineEdit("red", self._video_group)
+        self._layout_video.addWidget(self._label_color_setting, 0, 0)
+        self._layout_video.addWidget(self._color_setting, 0, 1)
+
+        self._label_size_setting = QLabel(self._video_group, text="Size of Answer :")
+        self._size_setting = QSpinBox(self._video_group, value=90)
+        self._layout_video.addWidget(self._label_size_setting, 1, 0)
+        self._layout_video.addWidget(self._size_setting, 1, 1)
     
+
+
         self._valid_creation_video = QPushButton(self._central_widget, text="Create Video")
         self._valid_creation_video.clicked.connect(self.createVideo)
         self._layout.addWidget(self._valid_creation_video)
@@ -220,14 +143,16 @@ class QMainUiWindow(QMainWindow):
         self._answer_dialog.show()
     
     def removePath(self):
-        answer_input_dialog = QDialogAnswer(self)
-        answer_input_dialog._answer.setEnabled(False)
+        answer_input_dialog = QDialogRemovePath(self)
         ret = answer_input_dialog.exec()
         if ret:
-            question, answer = answer_input_dialog.getAnswer()
-            self._answer_dialog.deleteAnswer(question)
+            answer = answer_input_dialog.getAnswer()
+            self._answer_dialog.deleteAnswer(answer)
     
     def createVideo(self) -> None:
+        n = len(self._answer_dialog)
+        if n==0:
+            return
         try:
             file_to_write = self._path_output.text()
             if os.path.exists(os.path.dirname(file_to_write)):
@@ -235,15 +160,14 @@ class QMainUiWindow(QMainWindow):
             else:
                 myBat = open('./cmd_file.bat','w')
             timer = (self._timer_from.value(), self._timer_to.value())
-            size = 90
-            fontcolor = "red"
+            size = self._size_setting.value()
+            fontcolor = self._color_setting.text()
             path_video_output = "C:/Users/clemeunier/Downloads/Video_test/CountDown_answer.mp4"
             myBat.write(self._path_ffmpeg_bin.text() + "/ffmpeg ")
             music_file =''
             music_separation_seconds = ''
             row_text_cmd = ''
             draw_text_cmd = ""
-            n = len(self._answer_dialog)
             for row in range(n):
 
                 music, answer, start = self._answer_dialog.get_row(row)
