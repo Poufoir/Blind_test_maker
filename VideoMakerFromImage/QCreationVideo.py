@@ -6,6 +6,7 @@ import os
 import subprocess
 from VideoMakerFromImage.QDialogTemp import QDialogAnswer, QDialogRemovePath
 from VideoMakerFromImage.QDialogShowAnswer import QDialogShowAnswer
+from VideoMakerFromImage.QCreationInputVideo import QCreationInputVideo
 
 class QMainUiWindow(QMainWindow):
 
@@ -30,7 +31,7 @@ class QMainUiWindow(QMainWindow):
         self._path_ffmpeg_bin.setPlaceholderText("Enter correct Path for ffmpeg bin")
         self._browse_path_ffmpeg = QPushButton(self._path_group, text="...")
         self._browse_path_ffmpeg.clicked.connect(self.browse_path_ffmpeg)
-
+        # Layout
         self._layout_path.addWidget(self._label_path_ffmpeg, 0, 0)
         self._layout_path.addWidget(self._path_ffmpeg_bin, 0, 1)
         self._layout_path.addWidget(self._browse_path_ffmpeg, 0, 2)
@@ -41,10 +42,15 @@ class QMainUiWindow(QMainWindow):
         self._path_Video.setPlaceholderText("Enter correct Path for Video")
         self._browse_path_video = QPushButton(self._path_group, text="...")
         self._browse_path_video.clicked.connect(self.browse_path(self._path_Video))
-
+        # Layout
         self._layout_path.addWidget(self._label_path_Video, 1, 0)
         self._layout_path.addWidget(self._path_Video, 1, 1)
         self._layout_path.addWidget(self._browse_path_video, 1, 2)
+
+        self._create_video = QPushButton(self, text="Create input video")
+        self._create_video.clicked.connect(self.create_input_video)
+        # Layout
+        self._layout_path.addWidget(self._create_video, 2, 0, 1, 3)
 
         self._label_path_output = QLabel(self._path_group, text="Path for Output :")
         path_output = os.getcwd().replace("\\", "/") + "/output.mp4"
@@ -52,10 +58,10 @@ class QMainUiWindow(QMainWindow):
         self._path_output.setPlaceholderText("Enter correct Path for Output")
         self._browse_path_output = QPushButton(self._path_group, text="...")
         self._browse_path_output.clicked.connect(self.browse_path(self._path_output))
-
-        self._layout_path.addWidget(self._label_path_output, 2, 0)
-        self._layout_path.addWidget(self._path_output, 2, 1)
-        self._layout_path.addWidget(self._browse_path_output, 2, 2)
+        # Layout
+        self._layout_path.addWidget(self._label_path_output, 3, 0)
+        self._layout_path.addWidget(self._path_output, 3, 1)
+        self._layout_path.addWidget(self._browse_path_output, 3, 2)
 
 
 
@@ -69,7 +75,7 @@ class QMainUiWindow(QMainWindow):
         self._timer_from = QDoubleSpinBox(self._answer_group, value=6.5)
         self._add_timer_to = QLabel(self._answer_group, text= "To", alignment=Qt.AlignRight)
         self._timer_to = QDoubleSpinBox(self._answer_group, value=10)
-
+        # Layout
         self._layout_answer.addWidget(self._add_timer_from, 0, 0)
         self._layout_answer.addWidget(self._timer_from, 0, 1)
         self._layout_answer.addWidget(self._add_timer_to, 0, 2)
@@ -77,14 +83,17 @@ class QMainUiWindow(QMainWindow):
 
         self._add_answer = QPushButton(self._answer_group, text="Add Music and Answer")
         self._add_answer.clicked.connect(self.addPath)
+        # Layout
         self._layout_answer.addWidget(self._add_answer, 1, 0, 1, 4)
 
         self._remove_answer = QPushButton(self._answer_group, text="Remove Music")
         self._remove_answer.clicked.connect(self.removePath)
+        # Layout
         self._layout_answer.addWidget(self._remove_answer, 2, 0, 1, 4)
 
         self._show_answer = QPushButton(self._answer_group, text="Show Music and Answer")
         self._show_answer.clicked.connect(self.showPath)
+        # Layout
         self._layout_answer.addWidget(self._show_answer, 3, 0, 1, 4)
 
 
@@ -95,11 +104,13 @@ class QMainUiWindow(QMainWindow):
 
         self._label_color_setting = QLabel(self._video_group, text="Color of Answer :")
         self._color_setting = QLineEdit("red", self._video_group)
+        # Layout
         self._layout_video.addWidget(self._label_color_setting, 0, 0)
         self._layout_video.addWidget(self._color_setting, 0, 1)
 
         self._label_size_setting = QLabel(self._video_group, text="Size of Answer :")
         self._size_setting = QSpinBox(self._video_group, value=90)
+        # Layout
         self._layout_video.addWidget(self._label_size_setting, 1, 0)
         self._layout_video.addWidget(self._size_setting, 1, 1)
     
@@ -196,4 +207,9 @@ class QMainUiWindow(QMainWindow):
             subprocess.call([path])
         except:
             pass
+        return
+    
+    def create_input_video(self) -> None:
+        creation_video = QCreationInputVideo(self)
+        creation_video.show()
         return
