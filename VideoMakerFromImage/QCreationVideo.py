@@ -1,7 +1,8 @@
 
-from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QDialog, QTableView, QHeaderView, QFileDialog
+from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QDialog, QTableView, QHeaderView, QFileDialog, QMessageBox, QDoubleSpinBox
 from PySide6.QtGui import QCloseEvent, QStandardItemModel, QStandardItem
-from typing import Optional, Dict, Tuple, List
+from PySide6.QtCore import Qt
+from typing import Optional, Dict, Tuple, List, Callable
 import os
 import subprocess
 
@@ -26,15 +27,29 @@ class QDialogAnswer(QDialog):
         self._layout.addWidget(self._label_answer, 1, 0)
         self._layout.addWidget(self._answer, 1, 1)
 
+        self._label_start = QLabel(self, text="Start of music :")
+        self._start = QDoubleSpinBox(self, value=0)
+        self._layout.addWidget(self._label_start, 2, 0)
+        self._layout.addWidget(self._start, 2, 1)
+
         self._valid = QPushButton(self, text= "Valid Answer")
         self._valid.clicked.connect(self.valid_answer)
         self._layout.addWidget(self._valid, 3, 0, 1, 2)
     
     def valid_answer(self) -> None:
-        self.accept()
+        if os.path.exists(self._link_path.text()):
+            self.accept()
+        else:
+            msgbox = QMessageBox(text="File not found on local, are you sure you wish to add?")
+            msgbox.setStandardButtons(QMessageBox.Yes)
+            msgbox.addButton(QMessageBox.No)
+            if (msgbox.exec() == QMessageBox.Yes):
+                self.accept()
+            else:
+                self.close()
     
-    def getAnswer(self) -> Tuple[str, str]:
-        return self._link_path.text(), self._answer.text()
+    def getAnswer(self) -> Tuple[str, str, float]:
+        return self._link_path.text(), self._answer.text(), self._start.value()
     
 class QDialogShowAnswer(QDialog):
 
@@ -122,12 +137,22 @@ class QMainUiWindow(QMainWindow):
         self._path_Video = QLineEdit(path_video, self._path_group)
         self._path_Video.setPlaceholderText("Enter correct Path for Video")
         self._browse_path_video = QPushButton(self._path_group, text="...")
-        self._browse_path_video.clicked.connect(self.browse_path_Video)
+        self._browse_path_video.clicked.connect(self.browse_path(self._path_Video))
 
         self._layout_path.addWidget(self._label_path_Video, 1, 0)
         self._layout_path.addWidget(self._path_Video, 1, 1)
         self._layout_path.addWidget(self._browse_path_video, 1, 2)
-    
+
+        self._label_path_output = QLabel(self._path_group, text="Path for Output :")
+        path_output = os.getcwd().replace("\\", "/") + "/output.mp4"
+        self._path_output = QLineEdit(path_output, self._path_group)
+        self._path_output.setPlaceholderText("Enter correct Path for Output")
+        self._browse_path_output = QPushButton(self._path_group, text="...")
+        self._browse_path_output.clicked.connect(self.browse_path(self._path_output))
+
+        self._layout_path.addWidget(self._label_path_output, 2, 0)
+        self._layout_path.addWidget(self._path_output, 2, 1)
+        self._layout_path.addWidget(self._browse_path_output, 2, 2)
 
         self._answer_group = QGroupBox("Music", self._central_widget)
         self._layout.addWidget(self._answer_group)
@@ -135,17 +160,27 @@ class QMainUiWindow(QMainWindow):
         self._layout_answer = QGridLayout(self._answer_group)
         self._answer_dialog = QDialogShowAnswer(self)
 
+        self._add_timer_from = QLabel(self._answer_group, text= "Add Answer (in second) from", alignment=Qt.AlignRight)
+        self._timer_from = QDoubleSpinBox(self._answer_group, value=6.5)
+        self._add_timer_to = QLabel(self._answer_group, text= "To", alignment=Qt.AlignRight)
+        self._timer_to = QDoubleSpinBox(self._answer_group, value=10)
+
+        self._layout_answer.addWidget(self._add_timer_from, 0, 0)
+        self._layout_answer.addWidget(self._timer_from, 0, 1)
+        self._layout_answer.addWidget(self._add_timer_to, 0, 2)
+        self._layout_answer.addWidget(self._timer_to, 0, 3)
+
         self._add_answer = QPushButton(self._answer_group, text="Add Music and Answer")
         self._add_answer.clicked.connect(self.addPath)
-        self._layout_answer.addWidget(self._add_answer, 0, 0)
+        self._layout_answer.addWidget(self._add_answer, 1, 0, 1, 4)
 
         self._remove_answer = QPushButton(self._answer_group, text="Remove Music")
         self._remove_answer.clicked.connect(self.removePath)
-        self._layout_answer.addWidget(self._remove_answer, 1, 0)
+        self._layout_answer.addWidget(self._remove_answer, 2, 0, 1, 4)
 
         self._show_answer = QPushButton(self._answer_group, text="Show Music and Answer")
         self._show_answer.clicked.connect(self.showPath)
-        self._layout_answer.addWidget(self._show_answer, 2, 0)
+        self._layout_answer.addWidget(self._show_answer, 3, 0, 1, 4)
     
         self._valid_creation_video = QPushButton(self._central_widget, text="Create Video")
         self._valid_creation_video.clicked.connect(self.createVideo)
@@ -165,12 +200,21 @@ class QMainUiWindow(QMainWindow):
             self._path_Video.setText(file_path[0])
         return
     
+    def browse_path(self, widget:QLineEdit)-> Callable[[], None]:
+        def change_text() -> None:
+            file_path = QFileDialog.getOpenFileName(self, 'Video Caption', filter="(*.mp4);;(*.*)")
+
+            if file_path[0]!= '':
+                widget.setText(file_path[0])
+            return
+        return change_text
+    
     def addPath(self) -> None:
         answer_input_dialog = QDialogAnswer(self)
         ret = answer_input_dialog.exec()
         if ret:
-            question, answer = answer_input_dialog.getAnswer()
-            self._answer_dialog.addAnswer(question, answer)
+            question, answer, start = answer_input_dialog.getAnswer()
+            self._answer_dialog.addAnswer(question, answer, start)
     
     def showPath(self) -> None:
         self._answer_dialog.show()
@@ -185,8 +229,12 @@ class QMainUiWindow(QMainWindow):
     
     def createVideo(self) -> None:
         try:
-            myBat = open('./cmd_file.bat','w')
-            timer = (6.5,10)
+            file_to_write = self._path_output.text()
+            if os.path.exists(os.path.dirname(file_to_write)):
+                myBat = open(file_to_write)
+            else:
+                myBat = open('./cmd_file.bat','w')
+            timer = (self._timer_from.value(), self._timer_to.value())
             size = 90
             fontcolor = "red"
             path_video_output = "C:/Users/clemeunier/Downloads/Video_test/CountDown_answer.mp4"
