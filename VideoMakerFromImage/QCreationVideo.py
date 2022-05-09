@@ -1,7 +1,7 @@
 
 from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QDoubleSpinBox, QSpinBox
 from PySide6.QtCore import Qt
-from typing import Optional, Dict, Tuple, List, Callable
+from typing import Optional, Dict, List, Callable
 import os
 import subprocess
 from VideoMakerFromImage.QDialogTemp import QDialogAnswer, QDialogRemovePath

@@ -1,6 +1,5 @@
 
-from operator import sub
-from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QDialog, QFormLayout, QDoubleSpinBox, QPushButton
+from PySide6.QtWidgets import  QWidget, QLineEdit, QGridLayout, QDialog, QFormLayout, QDoubleSpinBox, QPushButton
 from PySide6.QtCore import Qt
 from typing import Optional, Dict, Tuple, List, Callable
 import os
