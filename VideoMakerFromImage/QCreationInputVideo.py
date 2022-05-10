@@ -1,10 +1,35 @@
 
-from PySide6.QtWidgets import  QWidget, QLineEdit, QGridLayout, QDialog, QFormLayout, QDoubleSpinBox, QPushButton, QMessageBox
+from PySide6.QtWidgets import  QWidget, QLineEdit, QGridLayout, QDialog, QFormLayout, QDoubleSpinBox, QPushButton, QMessageBox, QComboBox, QSpinBox, QLabel
 from PySide6.QtCore import Qt
 from typing import Optional, Dict, Tuple, List, Callable
 import os
 import subprocess
 import pytube
+
+class QTimerClock(QWidget):
+    def __init__(self, parent: Optional[QWidget] = None, seconds:int=0, minutes:int=0, hours:int=0) -> None:
+        super().__init__(parent)
+
+        self._layout = QGridLayout(self)
+        self._hours = QSpinBox(self, minimum=0, value=hours)
+        self._hours.setSuffix("h")
+        self._minutes = QSpinBox(self, minimum=0, maximum = 59, value=minutes)
+        self._minutes.setSuffix("min")
+        self._seconds = QSpinBox(self, minimum=0, maximum = 59, value=seconds)
+        self._seconds.setSuffix("s")
+
+        self._layout.addWidget(self._hours, 0, 0)
+        label = QLabel(self, text=":")
+        label.setMaximumWidth(2)
+        self._layout.addWidget(label, 0, 1)
+        self._layout.addWidget(self._minutes, 0, 2)
+        label = QLabel(self, text=":")
+        label.setMaximumWidth(2)
+        self._layout.addWidget(label, 0, 3)
+        self._layout.addWidget(self._seconds, 0, 4)
+
+    def getTime(self) -> str:
+        return str(self._hours.value())+":"+str(self._minutes.value())+":"+str(self._seconds.value())
 
 class QCreationInputVideo(QDialog):
 
@@ -12,6 +37,7 @@ class QCreationInputVideo(QDialog):
         super().__init__(parent, modal=modal)
 
         self.setWindowTitle("Creation of input Video")
+        self.setMinimumSize(500, 300)
         self._layout = QGridLayout(self)
 
         self._form_layout = QFormLayout()
@@ -30,15 +56,27 @@ class QCreationInputVideo(QDialog):
         self._path_image.setPlaceholderText("Image Path")
         self._form_layout.addRow("Image Path :", self._path_image)
 
-        self._timer_video = QDoubleSpinBox(self, value=5.0)
-        self._form_layout.addRow("Time for Video display :", self._timer_video)
+        self._start_video = QTimerClock(self)
+        self._form_layout.addRow("Time to start Video display :", self._start_video)
 
-        self._timer_image = QDoubleSpinBox(self, value=5.0)
-        self._form_layout.addRow("Time for Image display :", self._timer_image)
+        self._timer_video = QTimerClock(self, seconds=5)
+        self._form_layout.addRow("Duration for Video display :", self._timer_video)
+
+        self._timer_image = QTimerClock(self, seconds=5)
+        self._form_layout.addRow("Duration for Image display :", self._timer_image)
 
         self._path_output = QLineEdit("", self)
         self._path_output.setPlaceholderText("Output Path")
         self._form_layout.addRow("Output Path :", self._path_output)
+
+        self._name_output = QLineEdit("", self)
+        self._name_output.setPlaceholderText("Output Name")
+        self._form_layout.addRow("Output Name :", self._name_output)
+
+        self._extension_output = QComboBox(self)
+        self._extension_output.setEditable(True)
+        self._extension_output.addItems(["mp4", "avi", "mkv"])
+        self._form_layout.addRow("Output Name :", self._extension_output)
     
         self._valid_creation = QPushButton(self, text="Valid Creation of video")
         self._valid_creation.clicked.connect(self.create_video)
@@ -49,7 +87,7 @@ class QCreationInputVideo(QDialog):
         path_image = self._path_image.text().replace("\\", "/")
         path_video = self._path_video.text().replace("\\", "/")
         path_output = self._path_output.text().replace("\\", "/").replace('\u202a', '')
-        if not(os.path.exists(path_ffmpeg) and os.path.exists(path_image) and os.path.exists(path_video)):
+        if not(os.path.exists(path_ffmpeg) and os.path.exists(path_image) and os.path.exists(path_video) and os.path.exists(path_output)):
             QMessageBox.critical(self, "Problem with paths", "Some paths do not exists", QMessageBox.Ok, QMessageBox.Ok)
             return
         try:
@@ -63,17 +101,21 @@ class QCreationInputVideo(QDialog):
 
             # Transform image with extension of video
             extension_video = "." +path_video.split(".")[-1]
-            subprocess_image_text = f'"{path_ffmpeg}/ffmpeg" -loop 1 -i "{path_image}" -c:v libx264 -t {self._timer_image.value()} -pix_fmt yuv420p -vf scale={width}:{height} "{actual_path}/image{extension_video}"'
+            subprocess_image_text = f'"{path_ffmpeg}/ffmpeg" -loop 1 -i "{path_image}" -c:v libx264 -t {self._timer_image.getTime()} -pix_fmt yuv420p -vf scale={width}:{height} "{actual_path}/image{extension_video}"'
             subprocess.call(subprocess_image_text)
 
             # Transform video
+            start = self._start_video.getTime()
             extension_video = "." +path_video.split(".")[-1]
-            subprocess_video_text = f'"{path_ffmpeg}/ffmpeg" -i "{path_video}" -c copy -t {self._timer_video.value()} "{actual_path}/video{extension_video}"'
+            subprocess_video_text = f'"{path_ffmpeg}/ffmpeg" -i "{path_video}" -ss {start} -to {self.addTimer(self._timer_video.getTime(), start)} -c:v libx264 -crf 23 "{actual_path}/video{extension_video}"'
             subprocess.call(subprocess_video_text)
 
             # Merge video and image
-            
-            subprocess_merge = f'"{path_ffmpeg}/ffmpeg" -i "{actual_path}/video{extension_video}" -i "{actual_path}/image{extension_video}" -filter_complex "[0:v][1:v] concat=n=2:v=1:a=0 [outv] " -vsync 2 -map "[outv]" "{path_output}"'
+            extension = self._extension_output.currentText()
+            output_name = self._name_output.text()
+            if not path_output.endswith("/"):
+                path_output += "/"
+            subprocess_merge = f'"{path_ffmpeg}/ffmpeg" -i "{actual_path}/video{extension_video}" -i "{actual_path}/image{extension_video}" -filter_complex "[0:v][1:v] concat=n=2:v=1:a=0 [outv] " -vsync 2 -map "[outv]" "{path_output+output_name}.{extension}"'
             subprocess.call(subprocess_merge)
             os.remove(f'{actual_path}/video{extension_video}')
             os.remove(f'{actual_path}/image{extension_video}')
@@ -81,3 +123,15 @@ class QCreationInputVideo(QDialog):
             self.accept()
         except Exception as e:
             QMessageBox.critical(self, "Convertion problem", f"{type(e)} - {str(e)}", QMessageBox.Ok, QMessageBox.Ok)
+    
+    def addTimer(self, first_time:str, second_time:str) -> str:
+        ft = first_time.split(":")
+        st = second_time.split(":")
+        seconds = int(ft[2])+int(st[2])
+        minutes = int(ft[1])+int(st[1])
+        hours = int(ft[0])+int(st[0])
+        seconds, add_minutes = seconds%60, seconds//60
+        minutes += add_minutes
+        minutes, add_hours = minutes%60, minutes//60
+        hours +=add_hours
+        return str(hours)+':'+str(minutes)+":"+str(seconds)
