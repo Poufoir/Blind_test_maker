@@ -1,7 +1,6 @@
 
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QDialog, QTableView, QHeaderView
 from PySide6.QtGui import QCloseEvent, QStandardItemModel, QStandardItem
-from PySide6.QtCore import Qt
 from typing import Optional, Dict, Tuple, List, Callable, Union
 
 class QDialogShowAnswer(QDialog):

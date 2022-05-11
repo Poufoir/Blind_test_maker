@@ -1,5 +1,4 @@
 
-from tkinter import E
 from PySide6.QtWidgets import QWidget, QLineEdit, QGridLayout, QPushButton, QDialog, QMessageBox, QDoubleSpinBox, QFormLayout, QSpinBox
 from typing import Optional, Dict, Tuple, List, Union
 import os

@@ -7,6 +7,7 @@ import subprocess
 from VideoMakerFromImage.QDialogTemp import QDialogAnswer, QDialogRemovePath
 from VideoMakerFromImage.QDialogShowAnswer import QDialogShowAnswer
 from VideoMakerFromImage.QCreationInputVideo import QCreationInputVideo
+from VideoMakerFromImage.helper_classes import QTimerClock
 
 class QMainUiWindow(QMainWindow):
 
@@ -71,15 +72,20 @@ class QMainUiWindow(QMainWindow):
         self._layout_answer = QGridLayout(self._answer_group)
         self._answer_dialog = QDialogShowAnswer(self)
 
-        self._add_timer_from = QLabel(self._answer_group, text= "Add Answer (in second) from", alignment=Qt.AlignRight)
-        self._timer_from = QDoubleSpinBox(self._answer_group, value=6.5)
-        self._add_timer_to = QLabel(self._answer_group, text= "To", alignment=Qt.AlignRight)
-        self._timer_to = QDoubleSpinBox(self._answer_group, value=10)
+        layout_timer = QGridLayout()
+        self._add_timer_from = QLabel(self._answer_group, text= "Add Answer from")
+        self._add_timer_from.setMaximumWidth(95)
+        self._timer_from = QTimerClock(self._answer_group, seconds=6.5, milliseconds=True)
+        self._add_timer_to = QLabel(self._answer_group, text= "To")
+        self._add_timer_to.setMaximumWidth(15)
+        self._timer_to = QTimerClock(self._answer_group, seconds=10, milliseconds=True)
         # Layout
-        self._layout_answer.addWidget(self._add_timer_from, 0, 0)
-        self._layout_answer.addWidget(self._timer_from, 0, 1)
-        self._layout_answer.addWidget(self._add_timer_to, 0, 2)
-        self._layout_answer.addWidget(self._timer_to, 0, 3)
+        layout_timer.addWidget(self._add_timer_from, 0, 0, Qt.AlignVCenter)
+        layout_timer.addWidget(self._timer_from, 0, 1, Qt.AlignVCenter)
+        layout_timer.addWidget(self._add_timer_to, 0, 2, Qt.AlignVCenter)
+        layout_timer.addWidget(self._timer_to, 0, 3, Qt.AlignVCenter)
+
+        self._layout_answer.addLayout(layout_timer, 0, 0, 1, 4)
 
         self._add_answer = QPushButton(self._answer_group, text="Add Music and Answer")
         self._add_answer.clicked.connect(self.addPath)
@@ -166,35 +172,40 @@ class QMainUiWindow(QMainWindow):
             return
         try:
             myBat = open('./cmd_file.bat','w')
-            timer = (self._timer_from.value(), self._timer_to.value())
+            timer = (self._timer_from.getTime(), self._timer_to.getTime())
             size = self._size_setting.value()
-            duration = 10
+            duration = QTimerClock.subtract(timer[1], timer[0])
             fontcolor = self._color_setting.text()
             path_video_output = self._path_output.text()
             myBat.write(self._path_ffmpeg_bin.text() + "/ffmpeg ")
             music_file =''
-            music_separation_seconds = ''
+            separation_seconds = ''
             row_text_cmd = ''
             draw_text_cmd = ""
             for row in range(n):
+                start_music = QTimerClock.multiplyTimer(timer[1], row)
+                start_answer = QTimerClock.addTimer(start_music,timer[0])
+                end_answer = QTimerClock.addTimer(start_answer,duration)
 
                 music, answer, start = self._answer_dialog.get_row(row)
+                end_music = QTimerClock.toSeconds(timer[1]) + start
 
                 myBat.write(f"-i {self._path_Video.text()} ")
-                row_text_cmd += f"[{row}:v] "
-                draw_text_cmd += f""" ;[outv] drawtext=enable='between(t,{timer[0]+10*row},{timer[1]+10*row})':text='{answer}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize={size}:fontcolor={fontcolor}[outv]"""
+                row_text_cmd += f"[video_row{row}] "
+                separation_seconds += f"""[{row}:v] trim=start=0:end={QTimerClock.toSeconds(timer[1])},setpts=PTS-STARTPTS[video_row{row}];"""
+                draw_text_cmd += f""" ;[outv] drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':text='{answer}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize={size}:fontcolor={fontcolor}[outv]"""
 
                 if os.path.exists(music):
                     music = music.replace("\\", "/")
                     music_file += f"""-i "{music}" """
-                    music_separation_seconds += f"""[{row+n}:a] atrim=start={start}:duration={duration},asetpts=PTS-STARTPTS[music_row{row}];"""
+                    separation_seconds += f"""[{row+n}:a] atrim=start={start}:end={end_music},asetpts=PTS-STARTPTS[music_row{row}];"""
                     row_text_cmd += f"[music_row{row}] "
 
             if music_file != '':
                 myBat.write(music_file)
             myBat.write('-filter_complex "')
             if music_file != '':
-                myBat.write(music_separation_seconds)
+                myBat.write(separation_seconds)
             myBat.write(row_text_cmd + f"concat=n={n}:v=1:a=1 [outv] [outa]")
             myBat.write(draw_text_cmd)
             myBat.write(""" " -map "[outv]" -map "[outa]" """)

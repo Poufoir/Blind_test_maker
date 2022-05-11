@@ -1,35 +1,11 @@
 
-from PySide6.QtWidgets import  QWidget, QLineEdit, QGridLayout, QDialog, QFormLayout, QDoubleSpinBox, QPushButton, QMessageBox, QComboBox, QSpinBox, QLabel
-from PySide6.QtCore import Qt
-from typing import Optional, Dict, Tuple, List, Callable
+from PySide6.QtWidgets import  QWidget, QLineEdit, QGridLayout, QDialog, QFormLayout, QPushButton, QMessageBox, QComboBox
+from typing import Optional, Dict, List
 import os
 import subprocess
 import pytube
+from VideoMakerFromImage.helper_classes import QTimerClock
 
-class QTimerClock(QWidget):
-    def __init__(self, parent: Optional[QWidget] = None, seconds:int=0, minutes:int=0, hours:int=0) -> None:
-        super().__init__(parent)
-
-        self._layout = QGridLayout(self)
-        self._hours = QSpinBox(self, minimum=0, value=hours)
-        self._hours.setSuffix("h")
-        self._minutes = QSpinBox(self, minimum=0, maximum = 59, value=minutes)
-        self._minutes.setSuffix("min")
-        self._seconds = QSpinBox(self, minimum=0, maximum = 59, value=seconds)
-        self._seconds.setSuffix("s")
-
-        self._layout.addWidget(self._hours, 0, 0)
-        label = QLabel(self, text=":")
-        label.setMaximumWidth(2)
-        self._layout.addWidget(label, 0, 1)
-        self._layout.addWidget(self._minutes, 0, 2)
-        label = QLabel(self, text=":")
-        label.setMaximumWidth(2)
-        self._layout.addWidget(label, 0, 3)
-        self._layout.addWidget(self._seconds, 0, 4)
-
-    def getTime(self) -> str:
-        return str(self._hours.value())+":"+str(self._minutes.value())+":"+str(self._seconds.value())
 
 class QCreationInputVideo(QDialog):
 
@@ -107,7 +83,7 @@ class QCreationInputVideo(QDialog):
             # Transform video
             start = self._start_video.getTime()
             extension_video = "." +path_video.split(".")[-1]
-            subprocess_video_text = f'"{path_ffmpeg}/ffmpeg" -i "{path_video}" -ss {start} -to {self.addTimer(self._timer_video.getTime(), start)} -c:v libx264 -crf 23 "{actual_path}/video{extension_video}"'
+            subprocess_video_text = f'"{path_ffmpeg}/ffmpeg" -i "{path_video}" -ss {start} -to {QTimerClock.addTimer(self._timer_video.getTime(), start)} -c:v libx264 -crf 23 "{actual_path}/video{extension_video}"'
             subprocess.call(subprocess_video_text)
 
             # Merge video and image
@@ -123,15 +99,3 @@ class QCreationInputVideo(QDialog):
             self.accept()
         except Exception as e:
             QMessageBox.critical(self, "Convertion problem", f"{type(e)} - {str(e)}", QMessageBox.Ok, QMessageBox.Ok)
-    
-    def addTimer(self, first_time:str, second_time:str) -> str:
-        ft = first_time.split(":")
-        st = second_time.split(":")
-        seconds = int(ft[2])+int(st[2])
-        minutes = int(ft[1])+int(st[1])
-        hours = int(ft[0])+int(st[0])
-        seconds, add_minutes = seconds%60, seconds//60
-        minutes += add_minutes
-        minutes, add_hours = minutes%60, minutes//60
-        hours +=add_hours
-        return str(hours)+':'+str(minutes)+":"+str(seconds)

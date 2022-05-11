@@ -8,5 +8,5 @@ How to change image:
     - Transform duration of video : ffmpeg -i input_video.extension -c copy -t 00:00:5.0 output_video.extension
     - Merge video and image transformed :
         - (echo file 'output_video.extension' & echo file 'output.extension_video' )>list.txt 
-        - ffmpeg -safe 0 -f concat -i list.txt -c copy C:\Users\clemeunier\Downloads\Video_test\test_avi.mp4
+        - ffmpeg -safe 0 -f concat -i list.txt -c copy C:\Users\yourprofile\Downloads\test_avi.mp4
 You got the video of Countdown and Image for displaying answer
