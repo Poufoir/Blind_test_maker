@@ -1,5 +1,5 @@
 
-from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QDoubleSpinBox, QSpinBox
+from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QSpinBox, QMessageBox
 from PySide6.QtCore import Qt
 from typing import Optional, Dict, List, Callable
 import os
@@ -15,7 +15,7 @@ class QMainUiWindow(QMainWindow):
         super().__init__(parent)
     
         self.setWindowTitle("Video Maker")
-        self.setMinimumSize(700,500)
+        self.setMinimumSize(600,500)
         self.move(700,0)
 
         self._central_widget = QWidget(self)
@@ -23,7 +23,7 @@ class QMainUiWindow(QMainWindow):
         self._layout = QVBoxLayout(self._central_widget)
 
         self._path_group = QGroupBox("Paths", self._central_widget)
-        self._layout.addWidget(self._path_group)
+        self._path_group.setStyleSheet("QGroupBox {border:1px solid black;}")
 
         self._layout_path = QGridLayout(self._path_group)
 
@@ -37,24 +37,28 @@ class QMainUiWindow(QMainWindow):
         self._layout_path.addWidget(self._path_ffmpeg_bin, 0, 1)
         self._layout_path.addWidget(self._browse_path_ffmpeg, 0, 2)
 
-        self._label_path_Video = QLabel(self._path_group, text="Path for Video :")
-        path_video = os.getcwd().replace("\\", "/") + "/CountDown.mp4"
-        self._path_Video = QLineEdit(path_video, self._path_group)
-        self._path_Video.setPlaceholderText("Enter correct Path for Video")
+        path_video = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage/5 SECOND TIMER.mp4"
+        self._path_video = QLineEdit(path_video, self._path_group)
+        self._path_video.setPlaceholderText("Enter correct Path for Video")
         self._browse_path_video = QPushButton(self._path_group, text="...")
-        self._browse_path_video.clicked.connect(self.browse_path(self._path_Video))
+        self._browse_path_video.clicked.connect(self.browse_path(self._path_video))
+        path_image = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage/sunrise.webp"
+        self._path_image = QLineEdit(path_image, self._path_group)
+        self._path_image.setPlaceholderText("Image Path")
+        self._browse_path_image = QPushButton(self._path_group, text="...")
+        self._browse_path_image.clicked.connect(self.browse_path(self._path_image))
+
         # Layout
-        self._layout_path.addWidget(self._label_path_Video, 1, 0)
-        self._layout_path.addWidget(self._path_Video, 1, 1)
+        self._layout_path.addWidget(QLabel(self._path_group, text="Path for Video :"), 1, 0)
+        self._layout_path.addWidget(self._path_video, 1, 1)
         self._layout_path.addWidget(self._browse_path_video, 1, 2)
 
-        self._create_video = QPushButton(self, text="Create input video")
-        self._create_video.clicked.connect(self.create_input_video)
-        # Layout
-        self._layout_path.addWidget(self._create_video, 2, 0, 1, 3)
+        self._layout_path.addWidget(QLabel(self._path_group, text="Path for Image :"), 2, 0)
+        self._layout_path.addWidget(self._path_image, 2, 1)
+        self._layout_path.addWidget(self._browse_path_image, 2, 2)
 
         self._label_path_output = QLabel(self._path_group, text="Path for Output :")
-        path_output = os.getcwd().replace("\\", "/") + "/output.mp4"
+        path_output = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage/output.mp4"
         self._path_output = QLineEdit(path_output, self._path_group)
         self._path_output.setPlaceholderText("Enter correct Path for Output")
         self._browse_path_output = QPushButton(self._path_group, text="...")
@@ -67,23 +71,18 @@ class QMainUiWindow(QMainWindow):
 
 
         self._answer_group = QGroupBox("Music", self._central_widget)
-        self._layout.addWidget(self._answer_group)
+        self._answer_group.setStyleSheet("QGroupBox {border:1px solid black;}")
 
         self._layout_answer = QGridLayout(self._answer_group)
         self._answer_dialog = QDialogShowAnswer(self)
 
         layout_timer = QGridLayout()
-        self._add_timer_from = QLabel(self._answer_group, text= "Add Answer from")
-        self._add_timer_from.setMaximumWidth(95)
-        self._timer_from = QTimerClock(self._answer_group, seconds=6.5, milliseconds=True)
-        self._add_timer_to = QLabel(self._answer_group, text= "To")
-        self._add_timer_to.setMaximumWidth(15)
-        self._timer_to = QTimerClock(self._answer_group, seconds=10, milliseconds=True)
+        duration_answer = QLabel(self._answer_group, text= "Duration of Answer :")
+        duration_answer.setMaximumWidth(110)
+        self._duration_answer = QTimerClock(self._answer_group, seconds=5, milliseconds=True)
         # Layout
-        layout_timer.addWidget(self._add_timer_from, 0, 0, Qt.AlignVCenter)
-        layout_timer.addWidget(self._timer_from, 0, 1, Qt.AlignVCenter)
-        layout_timer.addWidget(self._add_timer_to, 0, 2, Qt.AlignVCenter)
-        layout_timer.addWidget(self._timer_to, 0, 3, Qt.AlignVCenter)
+        layout_timer.addWidget(duration_answer, 0, 0, Qt.AlignVCenter)
+        layout_timer.addWidget(self._duration_answer, 0, 1, Qt.AlignVCenter)
 
         self._layout_answer.addLayout(layout_timer, 0, 0, 1, 4)
 
@@ -105,25 +104,37 @@ class QMainUiWindow(QMainWindow):
 
 
         self._video_group = QGroupBox("Video", self._central_widget)
-        self._layout.addWidget(self._video_group)
+        self._video_group.setStyleSheet("QGroupBox {border:1px solid black;}")
         self._layout_video = QGridLayout(self._video_group)
 
-        self._label_color_setting = QLabel(self._video_group, text="Color of Answer :")
+        self._start_video = QTimerClock(self)
+        # Layout
+        self._layout_video.addWidget(QLabel(self._video_group, text="Time to start Video display :"), 0, 0)
+        self._layout_video.addWidget(self._start_video, 0, 1)
+
+        self._timer_video = QTimerClock(self, seconds=6)
+        # Layout
+        self._layout_video.addWidget(QLabel(self._video_group, text="Duration of Video :"), 1, 0)
+        self._layout_video.addWidget(self._timer_video, 1, 1)
+
         self._color_setting = QLineEdit("red", self._video_group)
         # Layout
-        self._layout_video.addWidget(self._label_color_setting, 0, 0)
-        self._layout_video.addWidget(self._color_setting, 0, 1)
+        self._layout_video.addWidget(QLabel(self._video_group, text="Color of Answer :"), 2, 0)
+        self._layout_video.addWidget(self._color_setting, 2, 1)
 
-        self._label_size_setting = QLabel(self._video_group, text="Size of Answer :")
         self._size_setting = QSpinBox(self._video_group, value=90)
         # Layout
-        self._layout_video.addWidget(self._label_size_setting, 1, 0)
-        self._layout_video.addWidget(self._size_setting, 1, 1)
+        self._layout_video.addWidget(QLabel(self._video_group, text="Size of Answer :"), 3, 0)
+        self._layout_video.addWidget(self._size_setting, 3, 1)
     
-
 
         self._valid_creation_video = QPushButton(self._central_widget, text="Create Video")
         self._valid_creation_video.clicked.connect(self.createVideo)
+
+
+        self._layout.addWidget(self._path_group)
+        self._layout.addWidget(self._video_group)
+        self._layout.addWidget(self._answer_group)
         self._layout.addWidget(self._valid_creation_video)
 
     def browse_path_ffmpeg(self) -> None:
@@ -137,7 +148,7 @@ class QMainUiWindow(QMainWindow):
         file_path = QFileDialog.getOpenFileName(self, 'Video Caption', filter="(*.mp4);;(*.*)")
 
         if file_path[0]!= '':
-            self._path_Video.setText(file_path[0])
+            self._path_video.setText(file_path[0])
         return
     
     def browse_path(self, widget:QLineEdit)-> Callable[[], None]:
@@ -167,14 +178,21 @@ class QMainUiWindow(QMainWindow):
             self._answer_dialog.deleteAnswer(answer)
     
     def createVideo(self) -> None:
+        if not self.create_input_video():
+            return
         n = len(self._answer_dialog)
         if n==0:
             return
         try:
             myBat = open('./cmd_file.bat','w')
-            timer = (self._timer_from.getTime(), self._timer_to.getTime())
+            actual_path = os.getcwd().replace("\\", "/")
+            if actual_path.endswith("/"):
+                path_video = actual_path + "input_video.mp4"
+            else:
+                path_video = actual_path + "/input_video.mp4"
+            duration = self._duration_answer.getTime()
+            timer = (self._timer_video.getTime(), QTimerClock.addTimer(self._timer_video.getTime(), duration))
             size = self._size_setting.value()
-            duration = QTimerClock.subtract(timer[1], timer[0])
             fontcolor = self._color_setting.text()
             path_video_output = self._path_output.text()
             myBat.write(self._path_ffmpeg_bin.text() + "/ffmpeg ")
@@ -191,7 +209,7 @@ class QMainUiWindow(QMainWindow):
                 start = QTimerClock.toSeconds(start)
                 end_music = QTimerClock.toSeconds(timer[1]) + start
 
-                myBat.write(f"-i {self._path_Video.text()} ")
+                myBat.write(f"-i {path_video} ")
                 row_text_cmd += f"[video_row{row}] "
                 separation_seconds += f"""[{row}:v] trim=start=0:end={QTimerClock.toSeconds(timer[1])},setpts=PTS-STARTPTS[video_row{row}];"""
                 draw_text_cmd += f""" ;[outv] drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':text='{answer}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize={size}:fontcolor={fontcolor}[outv]"""
@@ -217,11 +235,48 @@ class QMainUiWindow(QMainWindow):
         try:
             path = os.getcwd().replace("\\", "/") + "/cmd_file.bat"
             subprocess.call([path])
+            os.remove(f'{path_video}')
         except:
             pass
         return
     
     def create_input_video(self) -> None:
-        creation_video = QCreationInputVideo(self)
-        creation_video.show()
-        return
+        path_ffmpeg = self._path_ffmpeg_bin.text().replace("\\", "/")
+        path_image = self._path_image.text().replace("\\", "/")
+        path_video = self._path_video.text().replace("\\", "/")
+        actual_path = os.getcwd().replace("\\", "/")
+        if actual_path.endswith("/"):
+            path_output = actual_path + "input_video.mp4"
+        else:
+            path_output = actual_path + "/input_video.mp4"
+        if not(os.path.exists(path_ffmpeg) and os.path.exists(path_image) and os.path.exists(path_video)):
+            QMessageBox.critical(self, "Problem with paths", "Some paths do not exists", QMessageBox.Ok, QMessageBox.Ok)
+            return False
+        try:
+            # Size of video
+            subprocess_text = f'"{path_ffmpeg}/ffprobe" -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "{path_video}"'
+            return_size = subprocess.check_output(subprocess_text)
+            width, height = return_size.decode().split("\r")[0].split("x")
+            width, height = int(width), int(height)
+
+
+            # Transform image with extension of video
+            extension_video = "." +path_video.split(".")[-1]
+            subprocess_image_text = f'"{path_ffmpeg}/ffmpeg" -loop 1 -i "{path_image}" -c:v libx264 -t {self._duration_answer.getTime()} -pix_fmt yuv420p -vf scale={width}:{height} "{actual_path}/image{extension_video}"'
+            subprocess.call(subprocess_image_text)
+
+            # Transform video
+            start = self._start_video.getTime()
+            extension_video = "." +path_video.split(".")[-1]
+            subprocess_video_text = f'"{path_ffmpeg}/ffmpeg" -i "{path_video}" -ss {start} -to {QTimerClock.addTimer(self._timer_video.getTime(), start)} -c:v libx264 -crf 23 "{actual_path}/video{extension_video}"'
+            subprocess.call(subprocess_video_text)
+
+            # Merge video and image
+            subprocess_merge = f'"{path_ffmpeg}/ffmpeg" -i "{actual_path}/video{extension_video}" -i "{actual_path}/image{extension_video}" -filter_complex "[0:v][1:v] concat=n=2:v=1:a=0 [outv] " -vsync 2 -map "[outv]" "{path_output}"'
+            subprocess.call(subprocess_merge)
+            os.remove(f'{actual_path}/video{extension_video}')
+            os.remove(f'{actual_path}/image{extension_video}')
+            return True
+        except Exception as e:
+            QMessageBox.critical(self, "Convertion problem", f"{type(e)} - {str(e)}", QMessageBox.Ok, QMessageBox.Ok)
+            return False
