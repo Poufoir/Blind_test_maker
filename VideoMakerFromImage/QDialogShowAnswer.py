@@ -21,7 +21,7 @@ class QDialogShowAnswer(QDialog):
         self._model.setHorizontalHeaderLabels(["Music link", "Answer", "Start of the Music"])
         self._tab_view.setModel(self._model)
         self._tab_view.horizontalHeader().setStretchLastSection(True)
-        self._tab_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self._tab_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
         self._layout.addWidget(self._tab_view)
 
@@ -36,6 +36,7 @@ class QDialogShowAnswer(QDialog):
             self._model.setItem(row, 1, QStandardItem(answer))
             self._model.setItem(row, 2, QStandardItem(start))
         self._answer[question] = (answer, start)
+        self._tab_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
     
     def deleteAnswer(self, question_or_row:Union[str,int]) -> Optional[str]:
         if isinstance(question_or_row, int) and question_or_row<=self._model.rowCount():
