@@ -2,8 +2,7 @@
 from PySide6.QtWidgets import QWidget, QLineEdit, QGridLayout, QPushButton, QDialog, QMessageBox, QDoubleSpinBox, QFormLayout, QSpinBox
 from typing import Optional, Dict, Tuple, List, Union
 import os
-
-from numpy import minimum
+from VideoMakerFromImage.helper_classes import QTimerClock
 
 class QDialogAnswer(QDialog):
 
@@ -25,7 +24,7 @@ class QDialogAnswer(QDialog):
         self._answer.setPlaceholderText("Answer")
         self._form_layout.addRow("Answer :", self._answer)
 
-        self._start = QDoubleSpinBox(self, value=0)
+        self._start = QTimerClock(self)
         self._form_layout.addRow("Start of music :", self._start)
 
         self._valid = QPushButton(self, text= "Valid Answer")
@@ -42,8 +41,8 @@ class QDialogAnswer(QDialog):
             else:
                 self.close()
     
-    def getAnswer(self) -> Tuple[str, str, float]:
-        return self._link_path.text(), self._answer.text(), self._start.value()
+    def getAnswer(self) -> Tuple[str, str, str]:
+        return self._link_path.text(), self._answer.text(), self._start.getTime()
 
 class QDialogRemovePath(QDialog):
 

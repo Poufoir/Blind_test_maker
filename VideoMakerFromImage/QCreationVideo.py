@@ -188,6 +188,7 @@ class QMainUiWindow(QMainWindow):
                 end_answer = QTimerClock.addTimer(start_answer,duration)
 
                 music, answer, start = self._answer_dialog.get_row(row)
+                start = QTimerClock.toSeconds(start)
                 end_music = QTimerClock.toSeconds(timer[1]) + start
 
                 myBat.write(f"-i {self._path_Video.text()} ")

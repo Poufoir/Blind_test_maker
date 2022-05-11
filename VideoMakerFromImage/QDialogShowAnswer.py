@@ -25,9 +25,9 @@ class QDialogShowAnswer(QDialog):
 
         self._layout.addWidget(self._tab_view)
 
-        self._answer:Dict[str, Tuple(str, float)] = {}
+        self._answer:Dict[str, Tuple(str, str)] = {}
 
-    def addAnswer(self, question:str, answer:str, start:float) -> None:
+    def addAnswer(self, question:str, answer:str, start:str) -> None:
         if question not in self._answer:
             items = [QStandardItem(question), QStandardItem(answer), QStandardItem(str(start))]
             self._model.appendRow(items)
@@ -59,7 +59,7 @@ class QDialogShowAnswer(QDialog):
     def __len__(self) -> int:
         return self._model.rowCount()
     
-    def get_row(self, row:int) -> Optional[Tuple[str, str, float]]:
+    def get_row(self, row:int) -> Optional[Tuple[str, str, str]]:
         if row<len(self):
-            return (self._model.item(row,0).text(), self._model.item(row,1).text(), float(self._model.item(row,2).text()))
+            return (self._model.item(row,0).text(), self._model.item(row,1).text(), self._model.item(row,2).text())
         return None
