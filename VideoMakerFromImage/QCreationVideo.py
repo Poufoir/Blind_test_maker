@@ -6,7 +6,6 @@ import os
 import subprocess
 from VideoMakerFromImage.QDialogTemp import QDialogAnswer, QDialogRemovePath
 from VideoMakerFromImage.QDialogShowAnswer import QDialogShowAnswer
-from VideoMakerFromImage.QCreationInputVideo import QCreationInputVideo
 from VideoMakerFromImage.helper_classes import QTimerClock
 
 class QMainUiWindow(QMainWindow):
