@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python : Fichier Actuel",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "VideoMakerFromImage Package",
+            "type": "python",
+            "request": "launch",
+            "module": "VideoMakerFromImage",
+            "justMyCode": false
+        }
+    ]
+}
