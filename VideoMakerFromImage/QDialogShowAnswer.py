@@ -41,7 +41,7 @@ class QDialogShowAnswer(QDialog):
     def deleteAnswer(self, question_or_row:Union[str,int]) -> Optional[str]:
         if isinstance(question_or_row, int) and question_or_row<=self._model.rowCount():
             row = question_or_row-1
-            question = self._model.item(row, 1).text()
+            question = self._model.item(row, 0).text()
             self._model.removeRow(row)
             return self._answer.pop(question)
         elif isinstance(question_or_row, str) and self._model.findItems(question_or_row, column=1)!=[]:

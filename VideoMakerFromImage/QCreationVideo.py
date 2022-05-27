@@ -14,7 +14,7 @@ class QMainUiWindow(QMainWindow):
         super().__init__(parent)
     
         self.setWindowTitle("Video Maker")
-        self.setMinimumSize(600,500)
+        self.setMinimumSize(800,500)
         self.move(700,0)
 
         self._central_widget = QWidget(self)
