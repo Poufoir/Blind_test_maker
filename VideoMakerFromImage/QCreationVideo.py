@@ -208,7 +208,7 @@ class QMainUiWindow(QMainWindow):
                 start = QTimerClock.toSeconds(start)
                 end_music = QTimerClock.toSeconds(timer[1]) + start
 
-                myBat.write(f"-i {path_video} ")
+                myBat.write(f'-i "{path_video}" ')
                 row_text_cmd += f"[video_row{row}] "
                 separation_seconds += f"""[{row}:v] trim=start=0:end={QTimerClock.toSeconds(timer[1])},setpts=PTS-STARTPTS[video_row{row}];"""
                 draw_text_cmd += f""" ;[outv] drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':text='{answer}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize={size}:fontcolor={fontcolor}[outv]"""
@@ -227,7 +227,7 @@ class QMainUiWindow(QMainWindow):
             myBat.write(row_text_cmd + f"concat=n={n}:v=1:a=1 [outv] [outa]")
             myBat.write(draw_text_cmd)
             myBat.write(""" " -map "[outv]" -map "[outa]" """)
-            myBat.write(f"{path_video_output}")
+            myBat.write(f'"{path_video_output}"')
             myBat.close()
         except Exception as e:
             pass
