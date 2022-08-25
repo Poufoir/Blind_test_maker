@@ -134,7 +134,7 @@ class QMainUiWindow(QMainWindow):
         self._layout_video.addWidget(QLabel(self._video_group, text="Color of Answer :"), 2, 0)
         self._layout_video.addWidget(self._color_setting, 2, 1)
 
-        self._size_setting = QSpinBox(self._video_group, value=90)
+        self._size_setting = QSpinBox(self._video_group, value=90, maximum = 500, minimum = 10)
         # Layout
         self._layout_video.addWidget(QLabel(self._video_group, text="Size of Answer :"), 3, 0)
         self._layout_video.addWidget(self._size_setting, 3, 1)
