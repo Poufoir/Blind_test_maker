@@ -9,7 +9,7 @@ class QDialogAnswer(QDialog):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
-        self.setWindowTitle("Answer")
+        self.setWindowTitle("Adding Music and Answer")
         self.setMinimumSize(700, 200)
 
         self._layout = QGridLayout(self)
@@ -22,18 +22,23 @@ class QDialogAnswer(QDialog):
         answer_path.clicked.connect(self.changePath)
         self._layout.addWidget(answer_path, 0, 2)
 
-        self._answer = QLineEdit(self)
-        self._answer.setPlaceholderText("Answer")
-        self._layout.addWidget(QLabel("Answer :"), 1, 0)
-        self._layout.addWidget(self._answer, 1, 1)
+        self._music_name = QLineEdit(self)
+        self._music_name.setPlaceholderText("Music Name")
+        self._layout.addWidget(QLabel("Music Name :"), 1, 0)
+        self._layout.addWidget(self._music_name, 1, 1)
+    
+        self._singer = QLineEdit(self)
+        self._singer.setPlaceholderText("Singer")
+        self._layout.addWidget(QLabel("Singer :"), 2, 0)
+        self._layout.addWidget(self._singer, 2, 1)
 
         self._start = QTimerClock(self)
-        self._layout.addWidget(QLabel("Link or Path :"), 2, 0)
-        self._layout.addWidget(self._start, 2, 1)
+        self._layout.addWidget(QLabel("Start of the Music :"), 3, 0)
+        self._layout.addWidget(self._start, 3, 1)
 
         self._valid = QPushButton(self, text= "Valid Answer")
         self._valid.clicked.connect(self.valid_answer)
-        self._layout.addWidget(self._valid, 3, 0, 1, 2)
+        self._layout.addWidget(self._valid, 4, 0, 1, 2)
     
     def valid_answer(self) -> None:
         if os.path.exists(self._link_path.text()):
@@ -46,7 +51,7 @@ class QDialogAnswer(QDialog):
                 self.close()
     
     def getAnswer(self) -> Tuple[str, str, str]:
-        return self._link_path.text(), self._answer.text(), self._start.getTime()
+        return self._link_path.text(), self._music_name.text() + " - " + self._singer.text(), self._start.getTime()
     
     def changePath(self) -> None:
         folder_path = QFileDialog.getOpenFileName(self, 'Music  Path', filter="(*.mp3);;(*.*)")
@@ -54,7 +59,12 @@ class QDialogAnswer(QDialog):
             self._link_path.setText(folder_path[0])
             basename:str = os.path.basename(folder_path[0])
             name = basename.split(".")[0]
-            self._answer.setText(name)
+            if "-" in name:
+                music_name, singer = name.split("-")
+                self._music_name.setText(music_name.rstrip(" "))
+                self._singer.setText(singer.lstrip(" "))
+            else:
+                self._music_name.setText(name)
         return
 
 class QDialogRemovePath(QDialog):

@@ -218,13 +218,15 @@ class QMainUiWindow(QMainWindow):
                 end_answer = QTimerClock.addTimer(start_answer,duration)
 
                 music, answer, start = self._answer_dialog.get_row(row)
+                music_name, singer = answer.split(" - ")
                 start = QTimerClock.toSeconds(start)
                 end_music = QTimerClock.toSeconds(timer[1]) + start
 
                 myBat.write(f'-i "{path_video}" ')
                 row_text_cmd += f"[video_row{row}] "
                 separation_seconds += f"""[{row}:v] trim=start=0:end={QTimerClock.toSeconds(timer[1])},setpts=PTS-STARTPTS[video_row{row}];"""
-                draw_text_cmd += f""" ;[outv] drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':text='{answer}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize={size}:fontcolor={fontcolor}[outv]"""
+                draw_text_cmd += f""" ;[outv] drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':text='{music_name}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize={size}:fontcolor={fontcolor},"""
+                draw_text_cmd += f"""drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':text='{singer}':x=(w-text_w)/2:y=(h+text_h)/2:fontsize={size}:fontcolor={fontcolor}[outv]"""
 
                 if os.path.exists(music):
                     music = music.replace("\\", "/")
