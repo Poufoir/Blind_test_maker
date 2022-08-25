@@ -129,7 +129,10 @@ class QMainUiWindow(QMainWindow):
         self._layout_video.addWidget(QLabel(self._video_group, text="Duration of Video :"), 1, 0)
         self._layout_video.addWidget(self._timer_video, 1, 1)
 
-        self._color_setting = QLineEdit("red", self._video_group)
+        self._color_setting = QComboBox(self._video_group, editable=True)
+        color_list = ["Beige", "Black", "Blue", "Brown", "Cyan", "Gray", "Green", "Magenta", "Orange", "Pink", "Red", "Violet", "White", "Yellow", "0xFFFFFF"]
+        self._color_setting.addItems(color_list)
+        self._color_setting.setCurrentText("Red")
         # Layout
         self._layout_video.addWidget(QLabel(self._video_group, text="Color of Answer :"), 2, 0)
         self._layout_video.addWidget(self._color_setting, 2, 1)
@@ -138,7 +141,8 @@ class QMainUiWindow(QMainWindow):
         # Layout
         self._layout_video.addWidget(QLabel(self._video_group, text="Size of Answer :"), 3, 0)
         self._layout_video.addWidget(self._size_setting, 3, 1)
-    
+
+        self._layout_video.setColumnStretch(1, 4)
 
         self._valid_creation_video = QPushButton(self._central_widget, text="Create Video")
         self._valid_creation_video.clicked.connect(self.createVideo)
@@ -205,7 +209,7 @@ class QMainUiWindow(QMainWindow):
             duration = self._duration_answer.getTime()
             timer = (self._timer_video.getTime(), QTimerClock.addTimer(self._timer_video.getTime(), duration))
             size = self._size_setting.value()
-            fontcolor = self._color_setting.text()
+            fontcolor = self._color_setting.currentText()
             path_video_output = self._path_output.text() + self._output_name.text() + self._output_extension.currentText()
             myBat.write(self._path_ffmpeg_bin.text() + "/ffmpeg ")
             music_file =''
