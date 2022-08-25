@@ -1,5 +1,5 @@
 
-from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QSpinBox, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QSpinBox, QMessageBox, QComboBox
 from PySide6.QtCore import Qt
 from typing import Optional, Dict, List, Callable
 import os
@@ -14,7 +14,7 @@ class QMainUiWindow(QMainWindow):
         super().__init__(parent)
     
         self.setWindowTitle("Video Maker")
-        self.setMinimumSize(800,500)
+        self.setMinimumSize(810,500)
         self.move(700,0)
 
         self._central_widget = QWidget(self)
@@ -26,13 +26,12 @@ class QMainUiWindow(QMainWindow):
 
         self._layout_path = QGridLayout(self._path_group)
 
-        self._label_path_ffmpeg = QLabel(self._path_group, text="Path for ffmpeg bin :")
         self._path_ffmpeg_bin = QLineEdit("D:/ffmpeg-2022-04-18-git-d5687236ab-full_build/bin", self._path_group)
         self._path_ffmpeg_bin.setPlaceholderText("Enter correct Path for ffmpeg bin")
         self._browse_path_ffmpeg = QPushButton(self._path_group, text="...")
         self._browse_path_ffmpeg.clicked.connect(self.browse_path_ffmpeg)
         # Layout
-        self._layout_path.addWidget(self._label_path_ffmpeg, 0, 0)
+        self._layout_path.addWidget(QLabel(self._path_group, text="Path for ffmpeg bin :"), 0, 0)
         self._layout_path.addWidget(self._path_ffmpeg_bin, 0, 1)
         self._layout_path.addWidget(self._browse_path_ffmpeg, 0, 2)
 
@@ -41,6 +40,12 @@ class QMainUiWindow(QMainWindow):
         self._path_video.setPlaceholderText("Enter correct Path for Video")
         self._browse_path_video = QPushButton(self._path_group, text="...")
         self._browse_path_video.clicked.connect(self.browse_path(self._path_video))
+
+        # Layout
+        self._layout_path.addWidget(QLabel(self._path_group, text="Path for Video :"), 1, 0)
+        self._layout_path.addWidget(self._path_video, 1, 1)
+        self._layout_path.addWidget(self._browse_path_video, 1, 2)
+
         path_image = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage/sunrise.webp"
         self._path_image = QLineEdit(path_image, self._path_group)
         self._path_image.setPlaceholderText("Image Path")
@@ -48,24 +53,32 @@ class QMainUiWindow(QMainWindow):
         self._browse_path_image.clicked.connect(self.browse_path(self._path_image))
 
         # Layout
-        self._layout_path.addWidget(QLabel(self._path_group, text="Path for Video :"), 1, 0)
-        self._layout_path.addWidget(self._path_video, 1, 1)
-        self._layout_path.addWidget(self._browse_path_video, 1, 2)
-
         self._layout_path.addWidget(QLabel(self._path_group, text="Path for Image :"), 2, 0)
         self._layout_path.addWidget(self._path_image, 2, 1)
         self._layout_path.addWidget(self._browse_path_image, 2, 2)
 
-        self._label_path_output = QLabel(self._path_group, text="Path for Output :")
-        path_output = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage/output.mp4"
+        path_output = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage/"
         self._path_output = QLineEdit(path_output, self._path_group)
         self._path_output.setPlaceholderText("Enter correct Path for Output")
         self._browse_path_output = QPushButton(self._path_group, text="...")
         self._browse_path_output.clicked.connect(self.browse_path(self._path_output))
+
         # Layout
-        self._layout_path.addWidget(self._label_path_output, 3, 0)
+        self._layout_path.addWidget(QLabel(self._path_group, text="Folder for Output :"), 3, 0)
         self._layout_path.addWidget(self._path_output, 3, 1)
         self._layout_path.addWidget(self._browse_path_output, 3, 2)
+
+        self._output_name = QLineEdit("output", self._path_group)
+        self._output_name.setPlaceholderText("Enter correct Path for Output")
+        list_output_extension = [".mp4", ".avi", ".mkv"]
+        self._output_extension = QComboBox(self._path_group)
+        self._output_extension.addItems(list_output_extension)
+        self._output_extension.setEditable(True)
+
+        # Layout
+        self._layout_path.addWidget(QLabel(self._path_group, text="Output Name :"), 4, 0)
+        self._layout_path.addWidget(self._output_name, 4, 1)
+        self._layout_path.addWidget(self._output_extension, 4, 2)
 
 
 
@@ -193,7 +206,7 @@ class QMainUiWindow(QMainWindow):
             timer = (self._timer_video.getTime(), QTimerClock.addTimer(self._timer_video.getTime(), duration))
             size = self._size_setting.value()
             fontcolor = self._color_setting.text()
-            path_video_output = self._path_output.text()
+            path_video_output = self._path_output.text() + self._output_name.text() + self._output_extension.currentText()
             myBat.write(self._path_ffmpeg_bin.text() + "/ffmpeg ")
             music_file =''
             separation_seconds = ''
