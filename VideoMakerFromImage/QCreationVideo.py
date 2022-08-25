@@ -57,11 +57,11 @@ class QMainUiWindow(QMainWindow):
         self._layout_path.addWidget(self._path_image, 2, 1)
         self._layout_path.addWidget(self._browse_path_image, 2, 2)
 
-        path_output = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage/"
+        path_output = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage"
         self._path_output = QLineEdit(path_output, self._path_group)
         self._path_output.setPlaceholderText("Enter correct Path for Output")
         self._browse_path_output = QPushButton(self._path_group, text="...")
-        self._browse_path_output.clicked.connect(self.browse_path(self._path_output))
+        self._browse_path_output.clicked.connect(self.browse_path(self._path_output, False))
 
         # Layout
         self._layout_path.addWidget(QLabel(self._path_group, text="Folder for Output :"), 3, 0)
@@ -167,12 +167,20 @@ class QMainUiWindow(QMainWindow):
             self._path_video.setText(file_path[0])
         return
     
-    def browse_path(self, widget:QLineEdit)-> Callable[[], None]:
+    def browse_path(self, widget:QLineEdit, file:bool = True)-> Callable[[], None]:
         def change_text() -> None:
-            file_path = QFileDialog.getOpenFileName(self, 'Video Caption', filter="(*.mp4);;(*.*)")
+            text = ""
+            if file:
+                file_path = QFileDialog.getOpenFileName(self, 'Video Caption', filter="(*.mp4);;(*.*)")
 
-            if file_path[0]!= '':
-                widget.setText(file_path[0])
+                if file_path[0] != '':
+                    text = file_path[0]
+            else:
+                folder_path = QFileDialog.getExistingDirectory(self, 'Video Caption')
+
+                if folder_path != '':
+                    text = folder_path
+            widget.setText(text)
             return
         return change_text
     
@@ -190,7 +198,7 @@ class QMainUiWindow(QMainWindow):
         answer_input_dialog = QDialogRemovePath(self)
         ret = answer_input_dialog.exec()
         if ret:
-            answer = answer_input_dialog.getAnswer()
+            answer = answer_input_dialog.getMusictoRemove()
             self._answer_dialog.deleteAnswer(answer)
     
     def createVideo(self) -> None:
@@ -210,7 +218,7 @@ class QMainUiWindow(QMainWindow):
             timer = (self._timer_video.getTime(), QTimerClock.addTimer(self._timer_video.getTime(), duration))
             size = self._size_setting.value()
             fontcolor = self._color_setting.currentText()
-            path_video_output = self._path_output.text() + self._output_name.text() + self._output_extension.currentText()
+            path_video_output = self._path_output.text() + "//" + self._output_name.text() + self._output_extension.currentText()
             myBat.write(self._path_ffmpeg_bin.text() + "/ffmpeg ")
             music_file =''
             separation_seconds = ''

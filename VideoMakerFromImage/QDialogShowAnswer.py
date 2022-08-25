@@ -8,7 +8,7 @@ class QDialogShowAnswer(QDialog):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
-        self.setWindowTitle("Show Answer")
+        self.setWindowTitle("Music Added")
         self.setMinimumSize(700,500)
         self.move(0,0)
         self._layout = QVBoxLayout(self)
