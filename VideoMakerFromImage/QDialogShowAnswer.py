@@ -1,7 +1,9 @@
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QDialog, QTableView, QHeaderView
-from PySide6.QtGui import QCloseEvent, QStandardItemModel, QStandardItem
-from typing import Optional, Dict, Tuple, List, Callable, Union
+from typing import Optional, Dict, Tuple, List, Union
+from random import sample
+
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QDialog, QTableView, QHeaderView, QMenuBar
+from PySide6.QtGui import QCloseEvent, QStandardItemModel, QStandardItem, QAction
 
 class QDialogShowAnswer(QDialog):
 
@@ -14,14 +16,23 @@ class QDialogShowAnswer(QDialog):
         self._layout = QVBoxLayout(self)
         self._block = True
 
+        self._menubar = QMenuBar(self)
+        self._shuffle_action = QAction("shuffle")
+        self._shuffle_action.triggered.connect(self._shuffle)
+        file = self._menubar.addMenu("File")
+        file.addAction(self._shuffle_action)
+
+        self._layout.setMenuBar(self._menubar)
+
         self._model = QStandardItemModel(self)
-        self._model.setColumnCount(2)
+        self._model.setColumnCount(4)
         self._tab_view = QTableView(self)
         self._tab_view.setEditTriggers(QTableView.NoEditTriggers)
         self._model.setHorizontalHeaderLabels(["Music link", "Answer", "Start of the Music"])
         self._tab_view.setModel(self._model)
         self._tab_view.horizontalHeader().setStretchLastSection(True)
         self._tab_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self._tab_view.hideColumn(3)
 
         self._layout.addWidget(self._tab_view)
 
@@ -29,7 +40,7 @@ class QDialogShowAnswer(QDialog):
 
     def addAnswer(self, question:str, answer:str, start:str) -> None:
         if question not in self._answer:
-            items = [QStandardItem(question), QStandardItem(answer), QStandardItem(str(start))]
+            items = [QStandardItem(question), QStandardItem(answer), QStandardItem(str(start)), QStandardItem(self._model.rowCount()+1)]
             self._model.appendRow(items)
         else:
             row = self._model.findItems(question)[0].row()
@@ -64,3 +75,10 @@ class QDialogShowAnswer(QDialog):
         if row<len(self):
             return (self._model.item(row,0).text(), self._model.item(row,1).text(), self._model.item(row,2).text())
         return None
+    
+    def _shuffle(self) -> None:
+        max_row = self._model.rowCount()
+        random_list = sample(range(0, max_row), max_row)
+        for row in range(max_row):
+            self._model.item(row, 3).setText(str(random_list[row]))
+            self._model.sort(3)
