@@ -1,7 +1,7 @@
 
 from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QSpinBox, QMessageBox, QComboBox
 from PySide6.QtCore import Qt
-from typing import Optional, Dict, List, Callable
+from typing import Optional, Callable
 import os
 import subprocess
 from VideoMakerFromImage.QDialogTemp import QDialogAnswer, QDialogRemovePath
@@ -26,47 +26,53 @@ class QMainUiWindow(QMainWindow):
 
         self._layout_path = QGridLayout(self._path_group)
 
+        self._path_windows_font = QLineEdit("C:/Windows", self._path_group, readOnly=True)
+        self._path_windows_font.setPlaceholderText("Enter correct Path for Windows")
+        self._browse_path_windows_font = QPushButton(self._path_group, text="...")
+        self._browse_path_windows_font.clicked.connect(self.browse_path_windows_font)
+        # Layout
+        self._layout_path.addWidget(QLabel(self._path_group, text="Path for Windows :"), 0, 0)
+        self._layout_path.addWidget(self._path_windows_font, 0, 1)
+        self._layout_path.addWidget(self._browse_path_windows_font, 0, 2)
+
         self._path_ffmpeg_bin = QLineEdit("D:/ffmpeg-2022-04-18-git-d5687236ab-full_build/bin", self._path_group)
         self._path_ffmpeg_bin.setPlaceholderText("Enter correct Path for ffmpeg bin")
         self._browse_path_ffmpeg = QPushButton(self._path_group, text="...")
         self._browse_path_ffmpeg.clicked.connect(self.browse_path_ffmpeg)
         # Layout
-        self._layout_path.addWidget(QLabel(self._path_group, text="Path for ffmpeg bin :"), 0, 0)
-        self._layout_path.addWidget(self._path_ffmpeg_bin, 0, 1)
-        self._layout_path.addWidget(self._browse_path_ffmpeg, 0, 2)
+        self._layout_path.addWidget(QLabel(self._path_group, text="Path for ffmpeg bin :"), 1, 0)
+        self._layout_path.addWidget(self._path_ffmpeg_bin, 1, 1)
+        self._layout_path.addWidget(self._browse_path_ffmpeg, 1, 2)
 
         path_video = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage/5 SECOND TIMER.mp4"
         self._path_video = QLineEdit(path_video, self._path_group)
         self._path_video.setPlaceholderText("Enter correct Path for Video")
         self._browse_path_video = QPushButton(self._path_group, text="...")
         self._browse_path_video.clicked.connect(self.browse_path(self._path_video))
-
         # Layout
-        self._layout_path.addWidget(QLabel(self._path_group, text="Path for Video :"), 1, 0)
-        self._layout_path.addWidget(self._path_video, 1, 1)
-        self._layout_path.addWidget(self._browse_path_video, 1, 2)
+        self._layout_path.addWidget(QLabel(self._path_group, text="Path for Video :"), 2, 0)
+        self._layout_path.addWidget(self._path_video, 2, 1)
+        self._layout_path.addWidget(self._browse_path_video, 2, 2)
 
         path_image = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage/sunrise.webp"
         self._path_image = QLineEdit(path_image, self._path_group)
         self._path_image.setPlaceholderText("Image Path")
         self._browse_path_image = QPushButton(self._path_group, text="...")
         self._browse_path_image.clicked.connect(self.browse_path(self._path_image))
-
         # Layout
-        self._layout_path.addWidget(QLabel(self._path_group, text="Path for Image :"), 2, 0)
-        self._layout_path.addWidget(self._path_image, 2, 1)
-        self._layout_path.addWidget(self._browse_path_image, 2, 2)
+        self._layout_path.addWidget(QLabel(self._path_group, text="Path for Image :"), 3, 0)
+        self._layout_path.addWidget(self._path_image, 3, 1)
+        self._layout_path.addWidget(self._browse_path_image, 3, 2)
 
         path_output = os.getcwd().replace("\\", "/") + "/VideoMakerFromImage"
         self._path_output = QLineEdit(path_output, self._path_group)
         self._path_output.setPlaceholderText("Enter correct Path for Output")
         self._browse_path_output = QPushButton(self._path_group, text="...")
         self._browse_path_output.clicked.connect(self.browse_path(self._path_output, False))
-
         # Layout
-        self._layout_path.addWidget(QLabel(self._path_group, text="Folder for Output :"), 3, 0)
-        self._layout_path.addWidget(self._path_output, 3, 1)
-        self._layout_path.addWidget(self._browse_path_output, 3, 2)
+        self._layout_path.addWidget(QLabel(self._path_group, text="Folder for Output :"), 4, 0)
+        self._layout_path.addWidget(self._path_output, 4, 1)
+        self._layout_path.addWidget(self._browse_path_output, 4, 2)
 
         self._output_name = QLineEdit("output", self._path_group)
         self._output_name.setPlaceholderText("Enter correct Path for Output")
@@ -74,11 +80,10 @@ class QMainUiWindow(QMainWindow):
         self._output_extension = QComboBox(self._path_group)
         self._output_extension.addItems(list_output_extension)
         self._output_extension.setEditable(True)
-
         # Layout
-        self._layout_path.addWidget(QLabel(self._path_group, text="Output Name :"), 4, 0)
-        self._layout_path.addWidget(self._output_name, 4, 1)
-        self._layout_path.addWidget(self._output_extension, 4, 2)
+        self._layout_path.addWidget(QLabel(self._path_group, text="Output Name :"), 5, 0)
+        self._layout_path.addWidget(self._output_name, 5, 1)
+        self._layout_path.addWidget(self._output_extension, 5, 2)
 
 
 
@@ -142,6 +147,12 @@ class QMainUiWindow(QMainWindow):
         self._layout_video.addWidget(QLabel(self._video_group, text="Size of Answer :"), 3, 0)
         self._layout_video.addWidget(self._size_setting, 3, 1)
 
+        self._font_setting = QComboBox(self._video_group)
+        self._change_fonts_display()
+        # Layout
+        self._layout_video.addWidget(QLabel(self._video_group, text="Font of Answer :"), 4, 0)
+        self._layout_video.addWidget(self._font_setting, 4, 1)
+
         self._layout_video.setColumnStretch(1, 4)
 
         self._valid_creation_video = QPushButton(self._central_widget, text="Create Video")
@@ -152,6 +163,14 @@ class QMainUiWindow(QMainWindow):
         self._layout.addWidget(self._video_group)
         self._layout.addWidget(self._answer_group)
         self._layout.addWidget(self._valid_creation_video)
+
+    def browse_path_windows_font(self) -> None:
+        folder_path = QFileDialog.getExistingDirectory(self, 'Windows Caption')
+
+        if folder_path != '' and "Fonts" in os.listdir(folder_path):
+            self._path_windows_font.setText(folder_path)
+            self._change_fonts_display()
+        return
 
     def browse_path_ffmpeg(self) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, 'ffmpeg Caption')
@@ -201,6 +220,15 @@ class QMainUiWindow(QMainWindow):
             answer = answer_input_dialog.getMusictoRemove()
             self._answer_dialog.deleteAnswer(answer)
     
+    def _change_fonts_display(self) -> None:
+        font_path = self._path_windows_font.text()
+        if os.path.isdir(font_path) and "Fonts" in os.listdir(font_path):
+            font_files = [file for file in os.listdir(font_path + "/Fonts") if file.endswith(".ttf")]
+            current_font = self._font_setting.currentText()
+            self._font_setting.clear()
+            self._font_setting.addItems(font_files)
+            self._font_setting.setCurrentText(current_font) if current_font != '' else self._font_setting.setCurrentText("arial.ttf")
+    
     def createVideo(self) -> None:
         if not self.create_input_video():
             return
@@ -218,6 +246,14 @@ class QMainUiWindow(QMainWindow):
             timer = (self._timer_video.getTime(), QTimerClock.addTimer(self._timer_video.getTime(), duration))
             size = self._size_setting.value()
             fontcolor = self._color_setting.currentText()
+            fontfile_no_escape = self._path_windows_font.text() + "/Fonts/" + self._font_setting.currentText()
+            temp_font_file = fontfile_no_escape.split(":")
+            if len(temp_font_file) == 1 :
+                fontfile = fontfile_no_escape
+            elif len(temp_font_file) == 2:
+                fontfile = temp_font_file[0] + "\\\\:" + temp_font_file[1]
+            else:
+                raise
             path_video_output = self._path_output.text() + "//" + self._output_name.text() + self._output_extension.currentText()
             myBat.write(self._path_ffmpeg_bin.text() + "/ffmpeg ")
             music_file =''
@@ -237,8 +273,8 @@ class QMainUiWindow(QMainWindow):
                 myBat.write(f'-i "{path_video}" ')
                 row_text_cmd += f"[video_row{row}] "
                 separation_seconds += f"""[{row}:v] trim=start=0:end={QTimerClock.toSeconds(timer[1])},setpts=PTS-STARTPTS[video_row{row}];"""
-                draw_text_cmd += f""" ;[outv] drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':text='{music_name}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize={size}:fontcolor={fontcolor},"""
-                draw_text_cmd += f"""drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':text='{singer}':x=(w-text_w)/2:y=(h+text_h)/2:fontsize={size}:fontcolor={fontcolor}[outv]"""
+                draw_text_cmd += f""" ;[outv] drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':fontfile={fontfile}:text='{music_name}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize={size}:fontcolor={fontcolor},"""
+                draw_text_cmd += f"""drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':fontfile={fontfile}:text='{singer}':x=(w-text_w)/2:y=(h+text_h)/2:fontsize={size}:fontcolor={fontcolor}[outv]"""
 
                 if os.path.exists(music):
                     music = music.replace("\\", "/")
