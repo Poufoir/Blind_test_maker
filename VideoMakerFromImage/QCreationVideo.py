@@ -1,9 +1,12 @@
 
-from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QSpinBox, QMessageBox, QComboBox
-from PySide6.QtCore import Qt
 from typing import Optional, Callable
 import os
 import subprocess
+
+from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QSpinBox, QMessageBox, QComboBox, QApplication
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
+
 from VideoMakerFromImage.QDialogTemp import QDialogAnswer, QDialogRemovePath
 from VideoMakerFromImage.QDialogShowAnswer import QDialogShowAnswer
 from VideoMakerFromImage.helper_classes import QTimerClock
@@ -16,6 +19,7 @@ class QMainUiWindow(QMainWindow):
         self.setWindowTitle("Video Maker")
         self.setMinimumSize(810,500)
         self.move(700,0)
+        QApplication.setWindowIcon(QIcon(os.getcwd().replace("\\", "/") + "/VideoMakerFromImage/clipboard_image.png"))
 
         self._central_widget = QWidget(self)
         self.setCentralWidget(self._central_widget)
