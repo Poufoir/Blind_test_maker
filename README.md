@@ -4,7 +4,7 @@ This library lets you create your own Blind test
 
 ## Download
 
-First of all, you need [ffmpeg](https://ffmpeg.org/download.html), [miniconda](https://docs.conda.io/en/latest/miniconda.html) or [anaconda](https://www.anaconda.com/products/distribution) and [Blind test maker repository](https://github.com/Poufoir/Blind_test_maker.git)\n
+First of all, you need [ffmpeg](https://ffmpeg.org/download.html), [miniconda](https://docs.conda.io/en/latest/miniconda.html) or [anaconda](https://www.anaconda.com/products/distribution) and [Blind test maker repository](https://github.com/Poufoir/Blind_test_maker.git) <br />
 You do not need to install them, just download the files and extract them.
 
 ## Activate environment
