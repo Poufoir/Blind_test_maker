@@ -1,8 +1,9 @@
 
 from typing import Optional, Dict, Tuple, List, Union
 from random import sample
+import json
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QDialog, QTableView, QHeaderView, QMenuBar
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QDialog, QTableView, QHeaderView, QMenuBar, QFileDialog
 from PySide6.QtGui import QCloseEvent, QStandardItemModel, QStandardItem, QAction
 
 class QDialogShowAnswer(QDialog):
@@ -17,9 +18,18 @@ class QDialogShowAnswer(QDialog):
         self._block = True
 
         self._menubar = QMenuBar(self)
-        self._shuffle_action = QAction("shuffle")
-        self._shuffle_action.triggered.connect(self._shuffle)
         file = self._menubar.addMenu("File")
+
+        self._load_playlist = QAction("Load Playlist")
+        self._load_playlist.triggered.connect(self._load)
+        file.addAction(self._load_playlist)
+
+        self._save_playlist = QAction("Save Playlist")
+        self._save_playlist.triggered.connect(self._save)
+        file.addAction(self._save_playlist)
+
+        self._shuffle_action = QAction("Shuffle")
+        self._shuffle_action.triggered.connect(self._shuffle)
         file.addAction(self._shuffle_action)
 
         self._layout.setMenuBar(self._menubar)
@@ -38,25 +48,25 @@ class QDialogShowAnswer(QDialog):
 
         self._answer:Dict[str, Tuple(str, str)] = {}
 
-    def addAnswer(self, question:str, answer:str, start:str) -> None:
-        if question not in self._answer:
-            items = [QStandardItem(question), QStandardItem(answer), QStandardItem(str(start)), QStandardItem(self._model.rowCount()+1)]
+    def addAnswer(self, music_link:str, answer:str, start:str) -> None:
+        if music_link not in self._answer:
+            items = [QStandardItem(music_link), QStandardItem(answer), QStandardItem(str(start)), QStandardItem(self._model.rowCount()+1)]
             self._model.appendRow(items)
         else:
-            row = self._model.findItems(question)[0].row()
+            row = self._model.findItems(music_link)[0].row()
             self._model.setItem(row, 1, QStandardItem(answer))
             self._model.setItem(row, 2, QStandardItem(start))
-        self._answer[question] = (answer, start)
+        self._answer[music_link] = (answer, start)
         self._tab_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
     
-    def deleteAnswer(self, question_or_row:Union[str,int]) -> Optional[str]:
-        if isinstance(question_or_row, int) and question_or_row<=self._model.rowCount():
-            row = question_or_row-1
+    def deleteAnswer(self, music_link_or_row:Union[str,int]) -> Optional[str]:
+        if isinstance(music_link_or_row, int) and music_link_or_row<=self._model.rowCount():
+            row = music_link_or_row - 1
             question = self._model.item(row, 0).text()
             self._model.removeRow(row)
             return self._answer.pop(question)
-        elif isinstance(question_or_row, str) and self._model.findItems(question_or_row, column=1)!=[]:
-            item = self._model.findItems(question_or_row, column=1)[0]
+        elif isinstance(music_link_or_row, str) and self._model.findItems(music_link_or_row, column=1) != []:
+            item = self._model.findItems(music_link_or_row, column=1)[0]
             row = item.row()
             question = self._model.item(row,0).text()
             self._model.removeRow(row)
@@ -82,3 +92,25 @@ class QDialogShowAnswer(QDialog):
         for row in range(max_row):
             self._model.item(row, 3).setText(str(random_list[row]))
             self._model.sort(3)
+    
+    def _load(self) -> None:
+        loading_file, _ = QFileDialog.getOpenFileName(self, "Loading Playlist", filter="Playlist(*.plm)")
+        if loading_file == '':
+            return
+        with  open(loading_file, "r") as storage_file:
+            content:Dict[str, List[str, str]] = json.load(storage_file)
+        for directory, [name, timer] in content.items():
+            self.addAnswer(directory, name, timer)
+
+    def _save(self) -> None:
+        saving_file, _ = QFileDialog.getSaveFileName(self, "Saving Playlist", filter="Playlist(*.plm)")
+        if saving_file == '':
+            return
+        content = {}
+        for row in range(self._model.rowCount()):
+            row_item = self.get_row(row)
+            if row_item != None:
+                directory, name, timer = row_item
+                content[directory] = (name, timer)
+        with open(saving_file, "w") as storage_file:
+            json.dump(content, storage_file, indent = 6)

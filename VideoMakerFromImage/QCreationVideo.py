@@ -36,7 +36,7 @@ class QMainUiWindow(QMainWindow):
         self._layout_path.addWidget(self._browse_path_windows_font, 0, 2)
 
         self._path_ffmpeg_bin = QLineEdit("D:/ffmpeg-2022-04-18-git-d5687236ab-full_build/bin", self._path_group)
-        self._path_ffmpeg_bin.setPlaceholderText("Enter correct Path for ffmpeg bin")
+        self._path_ffmpeg_bin.setPlaceholderText("Enter correct Folder for ffmpeg bin")
         self._browse_path_ffmpeg = QPushButton(self._path_group, text="...")
         self._browse_path_ffmpeg.clicked.connect(self.browse_path_ffmpeg)
         # Layout
