@@ -2,6 +2,7 @@
 from PySide6.QtWidgets import QWidget, QLineEdit, QGridLayout, QPushButton, QDialog, QMessageBox, QDoubleSpinBox, QFormLayout, QSpinBox, QLabel, QFileDialog
 from typing import Optional, Dict, Tuple, List, Union
 import os
+import re
 
 from VideoMakerFromImage.helper_classes import QTimerClock
 
@@ -42,8 +43,11 @@ class QDialogAnswer(QDialog):
         self._layout.addWidget(self._valid, 4, 0, 1, 2)
     
     def valid_answer(self) -> None:
-        if os.path.exists(self._link_path.text()):
+        french_accent = bool(re.search("[\u00C0-\u017F]", self._link_path.text() + self._music_name.text() + self._singer.text()))
+        if os.path.exists(self._link_path.text()) and not french_accent:
             self.accept()
+        elif french_accent:
+            ret = QMessageBox.critical(self, "French accent detected", "You cannot add this file\nPlease remove all french accent", QMessageBox.No, QMessageBox.No)
         else:
             ret = QMessageBox.warning(self, "File not found on Local", "Are you sure you wish to add?", QMessageBox.Yes|QMessageBox.No, QMessageBox.Yes)
             if ret == QMessageBox.Yes:
