@@ -2,6 +2,7 @@
 from typing import Optional, Callable
 import os
 import subprocess
+from pytube import YouTube, exceptions
 
 from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QSpinBox, QMessageBox, QComboBox, QApplication
 from PySide6.QtCore import Qt
@@ -280,11 +281,25 @@ class QMainUiWindow(QMainWindow):
                 draw_text_cmd += f""" ;[outv] drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':fontfile={fontfile}:text='{music_name}':x=(w-text_w)/2:y=(h-text_h)/2:fontsize={size}:fontcolor={fontcolor},"""
                 draw_text_cmd += f"""drawtext=enable='between(t,{QTimerClock.toSeconds(start_answer)},{QTimerClock.toSeconds(end_answer)})':fontfile={fontfile}:text='{singer}':x=(w-text_w)/2:y=(h+text_h)/2:fontsize={size}:fontcolor={fontcolor}[outv]"""
 
-                if os.path.exists(music):
+                def add_music(music:str, music_file:str, separation_seconds:str, row_text_cmd:str):
                     music = music.replace("\\", "/")
                     music_file += f"""-i "{music}" """
                     separation_seconds += f"""[{row+n}:a] atrim=start={start}:end={end_music},asetpts=PTS-STARTPTS[music_row{row}];"""
                     row_text_cmd += f"[music_row{row}] "
+
+                if os.path.exists(music):
+                    add_music(music, music_file, separation_seconds, row_text_cmd)
+                elif music.startswith("https://www.youtube.com/"):
+                    try:
+                        yt = YouTube(music)
+                        title = f"{music_name} - {singer}.mp4"
+                        music_directory = os.getcwd().replace("\\", "/") + f"/VideoMakerFromImage/Download_Youtube_Music"
+                        video_downloaded = yt.streams.filter(only_video=True).first().download(music_directory)
+                        music = music_directory + "/" + title
+                        os.rename(video_downloaded, music)
+                        add_music(music, music_file, separation_seconds, row_text_cmd)
+                    except Exception as e:
+                        pass
 
             if music_file != '':
                 myBat.write(music_file)

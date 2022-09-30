@@ -3,6 +3,8 @@ from PySide6.QtWidgets import QWidget, QLineEdit, QGridLayout, QPushButton, QDia
 from typing import Optional, Dict, Tuple, List, Union
 import os
 import re
+from pytube import YouTube
+from pytube.exceptions import RegexMatchError
 
 from VideoMakerFromImage.helper_classes import QTimerClock
 
@@ -18,6 +20,7 @@ class QDialogAnswer(QDialog):
 
         self._link_path = QLineEdit(self)
         self._link_path.setPlaceholderText("Link or Path")
+        self._link_path.textEdited.connect(self._text_edited)
         self._layout.addWidget(QLabel("Link or Path :"), 0, 0)
         self._layout.addWidget(self._link_path, 0, 1)
         answer_path = QPushButton(self, text="...")
@@ -43,11 +46,11 @@ class QDialogAnswer(QDialog):
         self._layout.addWidget(self._valid, 4, 0, 1, 2)
     
     def valid_answer(self) -> None:
-        french_accent = bool(re.search("[\u00C0-\u017F]", self._link_path.text() + self._music_name.text() + self._singer.text()))
-        if os.path.exists(self._link_path.text()) and not french_accent:
+        accent = bool(re.search("[\u00C0-\u017F]", self._link_path.text() + self._music_name.text() + self._singer.text()))
+        if os.path.exists(self._link_path.text()) and not accent:
             self.accept()
-        elif french_accent:
-            ret = QMessageBox.critical(self, "French accent detected", "You cannot add this file\nPlease remove all french accent", QMessageBox.No, QMessageBox.No)
+        elif accent:
+            ret = QMessageBox.critical(self, "Accents detected", "You cannot add this file\nPlease remove all accents", QMessageBox.No, QMessageBox.No)
         else:
             ret = QMessageBox.warning(self, "File not found on Local", "Are you sure you wish to add?", QMessageBox.Yes|QMessageBox.No, QMessageBox.Yes)
             if ret == QMessageBox.Yes:
@@ -71,6 +74,19 @@ class QDialogAnswer(QDialog):
             else:
                 self._music_name.setText(name)
         return
+    
+    def _text_edited(self, new_text:str) -> None:
+        if new_text.startswith("https://www.youtube.com/"):
+            try:
+                yt_link = YouTube(new_text)
+                yt_title = yt_link.title.split("-")
+                yt_music_name, yt_singer = yt_title if len(yt_title) == 2 else yt_title[0], ""
+                self._music_name.setText(yt_music_name)
+                self._singer.setText(yt_singer)
+            except RegexMatchError as e:
+                pass
+            except Exception as e:
+                pass
 
 class QDialogRemovePath(QDialog):
 
