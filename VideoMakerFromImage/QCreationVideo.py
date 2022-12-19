@@ -286,18 +286,21 @@ class QMainUiWindow(QMainWindow):
                     music_file += f"""-i "{music}" """
                     separation_seconds += f"""[{row+n}:a] atrim=start={start}:end={end_music},asetpts=PTS-STARTPTS[music_row{row}];"""
                     row_text_cmd += f"[music_row{row}] "
+                    return music_file, separation_seconds, row_text_cmd
 
                 if os.path.exists(music):
-                    add_music(music, music_file, separation_seconds, row_text_cmd)
+                    music_file, separation_seconds, row_text_cmd = add_music(music, music_file, separation_seconds, row_text_cmd)
                 elif music.startswith("https://www.youtube.com/"):
                     try:
                         yt = YouTube(music)
-                        title = f"{music_name} - {singer}.mp4"
+                        title = f"{music_name} - {singer}.mp3"
                         music_directory = os.getcwd().replace("\\", "/") + f"/VideoMakerFromImage/Download_Youtube_Music"
-                        video_downloaded = yt.streams.filter(only_video=True).first().download(music_directory)
                         music = music_directory + "/" + title
+                        if not os.path.exists(music):
+                            video_downloaded = yt.streams.filter(only_audio=True).first().download(music_directory)
+                            print(f"video download : {title}")
                         os.rename(video_downloaded, music)
-                        add_music(music, music_file, separation_seconds, row_text_cmd)
+                        music_file, separation_seconds, row_text_cmd = add_music(music, music_file, separation_seconds, row_text_cmd)
                     except Exception as e:
                         pass
 
@@ -317,7 +320,7 @@ class QMainUiWindow(QMainWindow):
             path = os.getcwd().replace("\\", "/") + "/cmd_file.bat"
             subprocess.call([path])
             os.remove(f'{path_video}')
-        except:
+        except Exception as e:
             pass
         return
     
