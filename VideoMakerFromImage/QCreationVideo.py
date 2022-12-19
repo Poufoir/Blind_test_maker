@@ -2,7 +2,7 @@
 from typing import Optional, Callable
 import os
 import subprocess
-from pytube import YouTube, exceptions
+from pytube import YouTube
 
 from PySide6.QtWidgets import QMainWindow, QWidget, QLineEdit, QLabel, QGridLayout, QGroupBox, QPushButton, QVBoxLayout, QFileDialog, QSpinBox, QMessageBox, QComboBox, QApplication
 from PySide6.QtCore import Qt
@@ -223,7 +223,11 @@ class QMainUiWindow(QMainWindow):
         ret = answer_input_dialog.exec()
         if ret:
             answer = answer_input_dialog.getMusictoRemove()
-            self._answer_dialog.deleteAnswer(answer)
+            if not isinstance(answer, str):
+                for row in range(answer[0], answer[1]+1):
+                    self._answer_dialog.deleteAnswer(answer[0])
+            else:
+                self._answer_dialog.deleteAnswer(answer)
     
     def _change_fonts_display(self) -> None:
         font_path = self._path_windows_font.text()
@@ -299,7 +303,7 @@ class QMainUiWindow(QMainWindow):
                         if not os.path.exists(music):
                             video_downloaded = yt.streams.filter(only_audio=True).first().download(music_directory)
                             print(f"video download : {title}")
-                        os.rename(video_downloaded, music)
+                            os.rename(video_downloaded, music)
                         music_file, separation_seconds, row_text_cmd = add_music(music, music_file, separation_seconds, row_text_cmd)
                     except Exception as e:
                         pass

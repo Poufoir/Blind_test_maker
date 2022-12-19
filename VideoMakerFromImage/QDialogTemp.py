@@ -104,8 +104,10 @@ class QDialogRemovePath(QDialog):
         self._music.setPlaceholderText("Music Name - Singer")
         self._form_layout.addRow("Music to remove :", self._music)
     
-        self._row = QSpinBox(self, value=1, minimum=1, maximum=999)
-        self._form_layout.addRow("Row to remove :", self._row)
+        self._first_row = QSpinBox(self, value=1, minimum=1, maximum=999)
+        self._end_row = QSpinBox(self, value=1, minimum=1, maximum=999)
+        self._form_layout.addRow("First row to remove :", self._first_row)
+        self._form_layout.addRow("End row to remove :", self._end_row)
     
         self._remove = QPushButton(self, text= "Valid Removing Music")
         self._remove.clicked.connect(self.remove)
@@ -114,10 +116,11 @@ class QDialogRemovePath(QDialog):
     def remove(self) -> None:
         self.accept()
     
-    def getMusictoRemove(self) -> Union[str, int]:
+    def getMusictoRemove(self) -> Union[str, Tuple[int, int]]:
         music_to_remove = self._music.text()
-        row = self._row.text()
+        first_row = self._first_row.value()
+        end_row = self._end_row.value() if self._end_row.text() != '' else first_row
         if music_to_remove=='':
-            return int(row)
+            return int(first_row), int(end_row)
         else:
             return music_to_remove
