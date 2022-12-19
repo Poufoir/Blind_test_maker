@@ -56,3 +56,5 @@ python -m VideoMakerFromImage
       - Answer : if you want to delete the answer
       - row : if you did not enter Answer and want to delete a row
    - Show Answer : show music entered and Answer, good use for removing music. You can close this, there will not any changes
+
+Note: you cannot create a video longer than 40 minutes
