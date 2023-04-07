@@ -1,7 +1,7 @@
 # Blind_test_maker
 
 [**Français**](https://github.com/Poufoir/Blind_test_maker/blob/main/README.fr.md)
-[**English**](https://github.com/Poufoir/Blind_test_maker/README.md)
+[**English**](https://github.com/Poufoir/Blind_test_maker/blob/main/README.md)
 
 Cette librairie permet de créer son propre Blind test <br>
 Il est nécessaire de télécharger sa musique ou d'avoir les liens Youtube correspondant<br>
@@ -10,7 +10,7 @@ Il est nécessaire de télécharger sa musique ou d'avoir les liens Youtube corr
 
 ## Téléchargement
 
-Premièremenet, il faut télécharger [ffmpeg](https://ffmpeg.org/download.html), [miniconda](https://docs.conda.io/en/latest/miniconda.html) or [anaconda](https://www.anaconda.com/products/distribution) et [Blind test maker repository](https://github.com/Poufoir/Blind_test_maker.git) <br />
+Premièrement, il faut télécharger [ffmpeg](https://ffmpeg.org/download.html), [miniconda](https://docs.conda.io/en/latest/miniconda.html) or [anaconda](https://www.anaconda.com/products/distribution) et [Blind test maker repository](https://github.com/Poufoir/Blind_test_maker.git) <br />
 Vous n'avez pas besoin de les intaller. Téléchargez les fichiers et extrayez les.
 
 ## Activation de l'environment
