@@ -1,6 +1,6 @@
 # Blind_test_maker
 
-[**Français**](https://github.com/Poufoir/Blind_test_maker/README.fr.md)
+[**Français**](https://github.com/Poufoir/Blind_test_maker/blob/main/README.fr.md)
 [**English**](https://github.com/Poufoir/Blind_test_maker/README.md)
 
 This library lets you create your own Blind test. <br>
