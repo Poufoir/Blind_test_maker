@@ -1,6 +1,11 @@
 # Blind_test_maker
 
-This library lets you create your own Blind test
+[**Français**](https://github.com/Poufoir/Blind_test_maker/README.fr.md)
+[**English**](https://github.com/Poufoir/Blind_test_maker/README.md)
+
+This library lets you create your own Blind test. <br>
+You need to download your own music or use a link from Youtube.<br>
+
 
 ## Download
 
